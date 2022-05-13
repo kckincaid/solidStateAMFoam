@@ -137,6 +137,30 @@ public:
             return *nuModel2_;
         }
 
+        //- Return const-access to phase1 density
+        const dimensionedScalar& rho1() const
+        {
+            return rho1_;
+        }
+
+        //- Return const-access to phase2 density
+        const dimensionedScalar& rho2() const
+        {
+            return rho2_;
+        }
+
+		//- Return const-access to phase1 specific heat
+		const dimensionedScalar& cp1() const
+		{
+			return cp1_;
+		}
+
+		//- Return const-access to phase2 specific heat
+		const dimensionedScalar& cp2() const
+		{
+			return cp2_;
+		}
+
         //- Return const-access to the mixture velocity
         const volVectorField& U() const
         {

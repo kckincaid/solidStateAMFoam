@@ -44,7 +44,7 @@ EXE_LIBS = \
 	-luserFrictionHeating \
 	-luserRotatingInlet \
 	-lusertwoPhaseConstantAbsorptionEmission \
-    -limmiscibleIncompressibleTwoPhaseThermalMixture \
+    -limmiscibleIncompressibleTwoPhaseThermalMixtureDev \
     -lincompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \

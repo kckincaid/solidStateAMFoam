@@ -104,8 +104,8 @@ Foam::incompressibleTwoPhaseThermalMixture::incompressibleTwoPhaseThermalMixture
 	cp2_("cp", dimEnergy/dimMass/dimTemperature, nuModel2_->viscosityProperties()),
 
 	// Thermal conductivity models
-	kModel1_("kModel", nuModel1_->viscosityProperties()),
-	kModel2_("kModel", nuModel2_->viscosityProperties()),
+	//kModel1_("kModel", nuModel1_->viscosityProperties()),
+	//kModel2_("kModel", nuModel2_->viscosityProperties()),
 
 	// Constant cubic thermal conductivity values
 	k1_("k", dimPower/dimLength/dimTemperature, nuModel1_->viscosityProperties()),
