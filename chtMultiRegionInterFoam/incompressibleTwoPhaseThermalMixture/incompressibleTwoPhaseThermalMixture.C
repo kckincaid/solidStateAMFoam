@@ -99,6 +99,14 @@ Foam::incompressibleTwoPhaseThermalMixture::incompressibleTwoPhaseThermalMixture
     rho1_("rho", dimDensity, nuModel1_->viscosityProperties()),
     rho2_("rho", dimDensity, nuModel2_->viscosityProperties()),
 
+	// Constant specific heats
+	cp1_("cp", dimEnergy/dimMass/dimTemperature, nuModel1_->viscosityProperties()),
+	cp2_("cp", dimEnergy/dimMass/dimTemperature, nuModel2_->viscosityProperties()),
+
+	// Thermal conductivity models
+	kModel1_("kModel", nuModel1_->viscosityProperties()),
+	kModel2_("kModel", nuModel2_->viscosityProperties()),
+
 	// Constant cubic thermal conductivity values
 	k1_("k", dimPower/dimLength/dimTemperature, nuModel1_->viscosityProperties()),
 	k2_("k", dimPower/dimLength/dimTemperature, nuModel2_->viscosityProperties()),
@@ -117,10 +125,6 @@ Foam::incompressibleTwoPhaseThermalMixture::incompressibleTwoPhaseThermalMixture
 	k23_("k3", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature/dimTemperature, nuModel2_->viscosityProperties()),
 	Tmax2_("Tmax", dimTemperature, nuModel2_->viscosityProperties()),
 	Tmin2_("Tmin", dimTemperature, nuModel2_->viscosityProperties()),
-
-	// Constant specific heats
-	cp1_("cp", dimEnergy/dimMass/dimTemperature, nuModel1_->viscosityProperties()),
-	cp2_("cp", dimEnergy/dimMass/dimTemperature, nuModel2_->viscosityProperties()),
 
     U_(U),
     phi_(phi),
@@ -219,12 +223,12 @@ Foam::incompressibleTwoPhaseThermalMixture::nuf() const
 Foam::tmp<Foam::volScalarField>
 Foam::incompressibleTwoPhaseThermalMixture::k1() const
 {
+	// Import temperature field
+	const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
+
 	// If cubic model, calculate based on temperature
 	if ( kModel1_ == "cubic" )
 	{
-		// Import temperature field
-		const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
-
 		// Create limited temperature field to prevent instabilities
 		const volScalarField limitedTemp_
 		(
@@ -258,12 +262,12 @@ Foam::incompressibleTwoPhaseThermalMixture::k1() const
 Foam::tmp<Foam::volScalarField>
 Foam::incompressibleTwoPhaseThermalMixture::k2() const
 {
+	// Import temperature field
+	const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
+
 	// If cubic model, calculate based on temperature
 	if ( kModel2_ == "cubic" )
 	{
-		// Import temperature field
-		const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
-
 		// Create limited temperature field to prevent instabilities
 		const volScalarField limitedTemp_
 		(

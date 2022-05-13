@@ -73,21 +73,23 @@ protected:
 		word kModel2_;
 
 		dimensionedScalar k1_;
+		dimensionedScalar k2_;
+
 		dimensionedScalar k10_;
 		dimensionedScalar k11_;
 		dimensionedScalar k12_;
 		dimensionedScalar k13_;
-		
-		word Tmax1_;
-		word Tmin1_;
-		word Tmax2_;
-		word Tmin2_;
+	
+		dimensionedScalar Tmax1_;
+		dimensionedScalar Tmin1_;
 
-		dimensionedScalar k2_;
 		dimensionedScalar k20_;
 		dimensionedScalar k21_;
 		dimensionedScalar k22_;
 		dimensionedScalar k23_;
+
+		dimensionedScalar Tmax2_;
+		dimensionedScalar Tmin2_;
 
         const volVectorField& U_;
         const surfaceScalarField& phi_;
@@ -165,6 +167,19 @@ public:
         //- Return the face-interpolated kinematic laminar viscosity
         tmp<surfaceScalarField> nuf() const;
 
+		//- Return the mixture thermal conductivity
+        tmp<volScalarField> k() const;
+
+		//- Return the phase thermal conductivities
+        tmp<volScalarField> k1() const;
+        tmp<volScalarField> k2() const;
+
+		//- Return the mixture specific heat
+        tmp<volScalarField> cp() const;
+
+		//- Return the mixture density
+        tmp<volScalarField> rho() const;
+
         //- Correct the laminar viscosity
         virtual void correct()
         {
@@ -173,15 +188,6 @@ public:
 
         //- Read base transportProperties dictionary
         virtual bool read();
-
-		//- Return the mixture thermal conductivity
-        tmp<volScalarField> k() const;
-
-		//- Return the mixture specific heat
-        tmp<volScalarField> cp() const;
-
-		//- Return the mixture density
-        tmp<volScalarField> rho() const;
 };
 
 
