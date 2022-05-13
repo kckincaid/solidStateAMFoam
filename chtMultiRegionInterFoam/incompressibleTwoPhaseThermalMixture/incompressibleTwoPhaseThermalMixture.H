@@ -77,6 +77,11 @@ protected:
 		dimensionedScalar k11_;
 		dimensionedScalar k12_;
 		dimensionedScalar k13_;
+		
+		word Tmax1_;
+		word Tmin1_;
+		word Tmax2_;
+		word Tmin2_;
 
 		dimensionedScalar k2_;
 		dimensionedScalar k20_;

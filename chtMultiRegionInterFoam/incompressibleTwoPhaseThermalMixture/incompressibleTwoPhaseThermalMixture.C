@@ -108,11 +108,15 @@ Foam::incompressibleTwoPhaseThermalMixture::incompressibleTwoPhaseThermalMixture
 	k11_("k1", dimPower/dimLength/dimTemperature/dimTemperature, nuModel1_->viscosityProperties()),
 	k12_("k2", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature, nuModel1_->viscosityProperties()),
 	k13_("k3", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature/dimTemperature, nuModel1_->viscosityProperties()),
+	Tmax1_("Tmax", dimTemperature, nuModel1_->viscosityProperties()),
+	Tmin1_("Tmin", dimTemperature, nuModel1_->viscosityProperties()),
 
 	k20_("k0", dimPower/dimLength/dimTemperature, nuModel2_->viscosityProperties()),
 	k21_("k1", dimPower/dimLength/dimTemperature/dimTemperature, nuModel2_->viscosityProperties()),
 	k22_("k2", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature, nuModel2_->viscosityProperties()),
 	k23_("k3", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature/dimTemperature, nuModel2_->viscosityProperties()),
+	Tmax2_("Tmax", dimTemperature, nuModel2_->viscosityProperties()),
+	Tmin2_("Tmin", dimTemperature, nuModel2_->viscosityProperties()),
 
 	// Constant specific heats
 	cp1_("cp", dimEnergy/dimMass/dimTemperature, nuModel1_->viscosityProperties()),
@@ -220,13 +224,19 @@ Foam::incompressibleTwoPhaseThermalMixture::k1() const
 	{
 		// Import temperature field
 		const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
+
+		// Create limited temperature field to prevent instabilities
+		const volScalarField limitedTemp_
+		(
+		    min(max(temp_, Tmin1_), Tmax1_)
+		);
 		
 		return tmp<volScalarField>
     	(
 		    new volScalarField
 		    (
 		        "k1",
-				k10_*(temp_/temp_) + k11_*temp_ + k12_*pow(temp, 2) + k13_*pow(temp_,3)
+				k10_*(limitedTemp_/limitedTemp_) + k11_*limitedTemp_ + k12_*pow(limitedTemp_, 2) + k13_*pow(limitedTemp_,3)
 		    )
     	);
 	}
@@ -253,13 +263,19 @@ Foam::incompressibleTwoPhaseThermalMixture::k2() const
 	{
 		// Import temperature field
 		const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
+
+		// Create limited temperature field to prevent instabilities
+		const volScalarField limitedTemp_
+		(
+		    min(max(temp_, Tmin2_), Tmax2_)
+		);
 		
 		return tmp<volScalarField>
     	(
 		    new volScalarField
 		    (
 		        "k2",
-				k20_*(temp_/temp_) + k21_*temp_ + k22_*pow(temp, 2) + k23_*pow(temp_,3)
+				k20_*(limitedTemp_/limitedTemp_) + k21_*limitedTemp_ + k22_*pow(limitedTemp_, 2) + k23_*pow(limitedTemp_,3)
 		    )
     	);
 	}
@@ -364,6 +380,8 @@ bool Foam::incompressibleTwoPhaseThermalMixture::read()
 				nuModel1_->viscosityProperties().lookup("k1") >> k11_;
 				nuModel1_->viscosityProperties().lookup("k2") >> k12_;
 				nuModel1_->viscosityProperties().lookup("k3") >> k13_;
+				nuModel1_->viscosityProperties().lookup("Tmax") >> Tmax1_;
+				nuModel1_->viscosityProperties().lookup("Tmin") >> Tmin1_;
 			}
 			else
 			{
@@ -377,6 +395,8 @@ bool Foam::incompressibleTwoPhaseThermalMixture::read()
 				nuModel2_->viscosityProperties().lookup("k1") >> k21_;
 				nuModel2_->viscosityProperties().lookup("k2") >> k22_;
 				nuModel2_->viscosityProperties().lookup("k3") >> k23_;
+				nuModel2_->viscosityProperties().lookup("Tmax") >> Tmax2_;
+				nuModel2_->viscosityProperties().lookup("Tmin") >> Tmin2_;
 			}
 			else
 			{
