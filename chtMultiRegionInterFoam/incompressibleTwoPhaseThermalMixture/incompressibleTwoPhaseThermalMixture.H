@@ -72,24 +72,24 @@ protected:
 		word kModel1_;
 		word kModel2_;
 
-		dimensionedScalar k1_;
-		dimensionedScalar k2_;
+		//dimensionedScalar k1_;
+		//dimensionedScalar k2_;
 
-		dimensionedScalar k10_;
-		dimensionedScalar k11_;
-		dimensionedScalar k12_;
-		dimensionedScalar k13_;
+		//dimensionedScalar k10_;
+		//dimensionedScalar k11_;
+		//dimensionedScalar k12_;
+		//dimensionedScalar k13_;
 	
-		dimensionedScalar Tmax1_;
-		dimensionedScalar Tmin1_;
+		//dimensionedScalar Tmax1_;
+		//dimensionedScalar Tmin1_;
 
-		dimensionedScalar k20_;
-		dimensionedScalar k21_;
-		dimensionedScalar k22_;
-		dimensionedScalar k23_;
+		//dimensionedScalar k20_;
+		//dimensionedScalar k21_;
+		//dimensionedScalar k22_;
+		//dimensionedScalar k23_;
 
-		dimensionedScalar Tmax2_;
-		dimensionedScalar Tmin2_;
+		//dimensionedScalar Tmax2_;
+		//dimensionedScalar Tmin2_;
 
         const volVectorField& U_;
         const surfaceScalarField& phi_;
