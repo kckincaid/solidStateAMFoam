@@ -34,17 +34,7 @@ EXE_INC = \
 
 EXE_LIBS = \
 	-L$(FOAM_USER_LIBBIN) \
-	-luserSheppardWright \
-	-luserNortonHoff \
-	-luserConstantRotationalSlip \
-	-luserExponentialRotationalSlip \
-	-luserFrictionRotationalSlip \
-	-luserConvection \
-	-luserConstantTemperatureConduction \
-	-luserFrictionHeating \
-	-luserRotatingInlet \
-	-lusertwoPhaseConstantAbsorptionEmission \
-    -limmiscibleIncompressibleTwoPhaseThermalMixtureDev \
+    -luserimmiscibleIncompressibleTwoPhaseThermalMixtureDev1 \
     -lincompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \
