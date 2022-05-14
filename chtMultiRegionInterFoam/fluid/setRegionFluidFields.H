@@ -27,23 +27,10 @@
 	volScalarField& rho = rhoFluid[i];
 	volScalarField& kf = kFluid[i];
 
-	dimensionedScalar& rho1 = rhoFluid1[i];
-	dimensionedScalar& rho2 = rhoFluid2[i];
-	dimensionedScalar& cp1	= cpFluid1[i];
-	dimensionedScalar& cp2 = cpFluid2[i];
-
-	//volScalarField& k1f = kFluid1[i];
-	//volScalarField& k2f = kFluid2[i];
-
-	// Temperature-dependent thermal conductivity constants
-	//dimensionedScalar& k0_1 = k0Fluid1[i];
-	//dimensionedScalar& k1_1 = k1Fluid1[i];
-	//dimensionedScalar& k2_1 = k2Fluid1[i];
-	//dimensionedScalar& k3_1 = k3Fluid1[i];
-	//dimensionedScalar& k0_2 = k0Fluid2[i];
-	//dimensionedScalar& k1_2 = k1Fluid2[i];
-	//dimensionedScalar& k2_2 = k2Fluid2[i];
-	//dimensionedScalar& k3_2 = k3Fluid2[i];
+	dimensionedScalar rho1 = thermo.rho1();
+	dimensionedScalar rho2 = thermo.rho2();
+	dimensionedScalar cp1	= thermo.cp1();
+	dimensionedScalar cp2  = thermo.cp2();
 
 	// Temperature-dependent max shear stress constants
 	dimensionedScalar& TC0 = TC0Fluid[i];

@@ -37,24 +37,6 @@ PtrList<surfaceScalarField> rhoPhiCpFluid(fluidRegions.size()); // energy flux
 PtrList<volScalarField> kFluid(fluidRegions.size());
 PtrList<volScalarField> cpFluid(fluidRegions.size());
 
-// Phase individual properties
-PtrList<dimensionedScalar> rhoFluid1(fluidRegions.size());
-PtrList<dimensionedScalar> rhoFluid2(fluidRegions.size());
-PtrList<dimensionedScalar> cpFluid1(fluidRegions.size());
-PtrList<dimensionedScalar> cpFluid2(fluidRegions.size());
-PtrList<volScalarField> kFluid1(fluidRegions.size());
-PtrList<volScalarField> kFluid2(fluidRegions.size());
-
-// Cubic thermal conductivity coefficients
-PtrList<dimensionedScalar> k0Fluid1(fluidRegions.size());
-PtrList<dimensionedScalar> k1Fluid1(fluidRegions.size());
-PtrList<dimensionedScalar> k2Fluid1(fluidRegions.size());
-PtrList<dimensionedScalar> k3Fluid1(fluidRegions.size());
-PtrList<dimensionedScalar> k0Fluid2(fluidRegions.size());
-PtrList<dimensionedScalar> k1Fluid2(fluidRegions.size());
-PtrList<dimensionedScalar> k2Fluid2(fluidRegions.size());
-PtrList<dimensionedScalar> k3Fluid2(fluidRegions.size());
-
 // Quartic temp-dependent max shear stress coeffs
 // Correlation is for temp (K) to max shear stress (MPa)
 PtrList<dimensionedScalar> TC0Fluid(fluidRegions.size());
@@ -257,170 +239,6 @@ forAll(fluidRegions, i)
 		)
 	);
 
-	rhoFluid1.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"rho1",
-			twoPhaseFluid[i].rho1()
-		)
-	);
-
-	rhoFluid2.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"rho2",
-			twoPhaseFluid[i].rho2()
-		)
-	);
-
-	cpFluid1.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"cp1",
-			twoPhaseFluid[i].cp1()
-		)
-	);
-
-	cpFluid2.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"cp2",
-			twoPhaseFluid[i].cp2()
-		)
-	);
-
-	k0Fluid1.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"k0_1",
-			dimensionSet(1, 1, -3, -1, 0, 0, 0),
-			twoPhaseFluid[i].nuModel1().viscosityProperties().lookup("k0")
-		)
-	);
-
-	k1Fluid1.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"k1_1",
-			dimensionSet(1, 1, -3, -2, 0, 0, 0),
-			twoPhaseFluid[i].nuModel1().viscosityProperties().lookup("k1")
-		)
-	);
-
-	k2Fluid1.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"k2_1",
-			dimensionSet(1, 1, -3, -3, 0, 0, 0),
-			twoPhaseFluid[i].nuModel1().viscosityProperties().lookup("k2")
-		)
-	);
-
-	k3Fluid1.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"k3_1",
-			dimensionSet(1, 1, -3, -4, 0, 0, 0),
-			twoPhaseFluid[i].nuModel1().viscosityProperties().lookup("k3")
-		)
-	);
-
-	k0Fluid2.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"k0_2",
-			dimensionSet(1, 1, -3, -1, 0, 0, 0),
-			twoPhaseFluid[i].nuModel2().viscosityProperties().lookup("k0")
-		)
-	);
-
-	k1Fluid2.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"k1_2",
-			dimensionSet(1, 1, -3, -2, 0, 0, 0),
-			twoPhaseFluid[i].nuModel2().viscosityProperties().lookup("k1")
-		)
-	);
-
-	k2Fluid2.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"k2_2",
-			dimensionSet(1, 1, -3, -3, 0, 0, 0),
-			twoPhaseFluid[i].nuModel2().viscosityProperties().lookup("k2")
-		)
-	);
-
-	k3Fluid2.set
-	(
-		i,
-		new dimensionedScalar
-		(
-			"k3_2",
-			dimensionSet(1, 1, -3, -4, 0, 0, 0),
-			twoPhaseFluid[i].nuModel2().viscosityProperties().lookup("k3")
-		)
-	);
-
-	Info<< "    Calculating phase 1 thermal conductivity kFluid1\n" << endl;
-    kFluid1.set
-    (
-        i,
-        new volScalarField
-        (
-            IOobject
-            (
-                "k1",
-                runTime.timeName(),
-                fluidRegions[i],
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            ),
-            k0Fluid1[i] + k1Fluid1[i]*TFluid[i] + k2Fluid1[i]*TFluid[i]*TFluid[i] + k3Fluid1[i]*TFluid[i]*TFluid[i]*TFluid[i]
-        )
-    );
-
-	Info<< "    Calculating phase 2 thermal conductivity kFluid2\n" << endl;
-    kFluid2.set
-    (
-        i,
-        new volScalarField
-        (
-            IOobject
-            (
-                "k2",
-                runTime.timeName(),
-                fluidRegions[i],
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            ),
-            k0Fluid2[i] + k1Fluid2[i]*TFluid[i] + k2Fluid2[i]*TFluid[i]*TFluid[i] + k3Fluid2[i]*TFluid[i]*TFluid[i]*TFluid[i]
-        )
-    );
-
 	Info<< "    Calculating average fluid thermal conductivity kFluid\n" << endl;
     kFluid.set
     (
@@ -435,7 +253,8 @@ forAll(fluidRegions, i)
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
-            alpha1l[i]*kFluid1[i] + alpha2l[i]*kFluid2[i]
+			fluidRegions[i],
+            dimensionedScalar("k", dimPower/dimLength/dimTemperature, 0.0)
         )
     );
 
@@ -453,7 +272,8 @@ forAll(fluidRegions, i)
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
-            alpha1l[i]*rhoFluid1[i] + alpha2l[i]*rhoFluid2[i]
+			fluidRegions[i],
+            dimensionedScalar("rho", dimDensity, 0.0)
         )
     );
 
@@ -471,7 +291,8 @@ forAll(fluidRegions, i)
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
-            alpha1l[i]*cpFluid1[i] + alpha2l[i]*cpFluid2[i]
+			fluidRegions[i],
+            dimensionedScalar("cp", dimEnergy/dimMass/dimTemperature, 0.0)
         )
     );
 
@@ -509,9 +330,8 @@ forAll(fluidRegions, i)
 				IOobject::NO_READ,
 				IOobject::NO_WRITE
 			),
-			alpha1l[i]*rhoFluid1[i]*cpFluid1[i] 
-			+ (scalar(1) - alpha1l[i])*rhoFluid2[i]*cpFluid2[i],
-        	alpha1l[i].boundaryField().types()
+			fluidRegions[i],
+			dimensionedScalar("rhoCp", dimEnergy/pow(dimLength,3)/dimTemperature, 0.0)
 		)
 	);
 
@@ -531,7 +351,7 @@ forAll(fluidRegions, i)
 				IOobject::NO_READ,
 				IOobject::NO_WRITE
 			),
-			rhoPhiFluid[i]*cpFluid1[i]
+			rhoPhiFluid[i]*twoPhaseFluid[i].cp1()
 		)
 	);
 
@@ -704,19 +524,6 @@ forAll(fluidRegions, i)
 		)
 	);
 
-	// Create fields for traverse velocity
-	//Info<< "	Creating velocity vector for modified reference frame\n" << endl;
-	//VtFluid.set
-	//(
-	//	i,
-	//	new dimensionedVector
-	//	(
-	//		"Vt",
-	//		dimVelocity,
-	//		transportPropertiesl[i].lookup("Vt")
-	//	)
-	//);
-
 	UtFluid.set
 	(
 		i,
@@ -734,18 +541,6 @@ forAll(fluidRegions, i)
 			Vt //VtFluid[i]
 		)
 	);
-
-	// Celcius conversion
-	//celsConvl.set
-	//(
-	//	i,
-	//	new dimensionedScalar
-	//	(
-	//		"celsConv",
-	//		dimTemperature,
-	//		transportPropertiesl[i].lookup("celsConv")
-	//	)
-	//);
 
 	// Viscous heating coefficient
 	phiViscl.set
