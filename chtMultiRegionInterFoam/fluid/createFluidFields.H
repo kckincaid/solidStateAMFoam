@@ -62,9 +62,6 @@ List<bool> particleTrackingl(fluidRegions.size());
 PtrList<volScalarField> betaFluid(fluidRegions.size());
 PtrList<dimensionedScalar> gammaBetaFluid(fluidRegions.size());
 
-// Celsius conversion
-//PtrList<dimensionedScalar> celsConvl(fluidRegions.size());
-
 // Other necessary lists
 PtrList<incompressible::turbulenceModel> turbulenceFluid(fluidRegions.size());
 PtrList<radiation::radiationModel> radiationFluid(fluidRegions.size());

@@ -24,9 +24,12 @@
 
     incompressible::turbulenceModel& turbulence = turbulenceFluid[i];
 
+	// Mixture thermal properties
 	volScalarField& rho = rhoFluid[i];
 	volScalarField& kf = kFluid[i];
+	volScalarField& cpf = cpFluid[i];
 
+	// Individual phase properties
 	dimensionedScalar rho1 = thermo.rho1();
 	dimensionedScalar rho2 = thermo.rho2();
 	dimensionedScalar cp1	= thermo.cp1();
@@ -56,8 +59,6 @@
 	volScalarField& beta = betaFluid[i];
 	dimensionedScalar& gammaBeta = gammaBetaFluid[i];
 	
-	//dimensionedScalar& celsConv = celsConvl[i];
-
     volScalarField& alpha1(thermo.alpha1());
 	volScalarField& alpha2(thermo.alpha2());
 

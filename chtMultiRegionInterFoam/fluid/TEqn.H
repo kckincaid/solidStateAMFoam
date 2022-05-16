@@ -2,9 +2,6 @@
 	// Calculate frictional heating for boundary conditions
 	#include "calculateFrictionalHeating.H"
 
-	// Conversion factor since conductivity fit function is in Celsius
-	dimensionedScalar celsConv("celsConv", dimTemperature, -273.0);
-
 	// Calculate effective viscosity
 	muEff = thermo.mu();
 
@@ -13,11 +10,14 @@
 
 	// Calculate viscous heating / plastic dissipation term
 	qvisc = 3.0*phiVisc*muEff*pow(epsilonDotEq, 2);
-	
-	// Find fluid conducticity at cell centers using volume average
-	kf = thermo.k1()*alpha1 + thermo.k2()*alpha2;
 
-	// Initialize face conductivity outside of if statement
+	// Update mixture specific heat (not used in internal calcs)
+	cpf = thermo.cp();
+	
+	// Update mixture conductivity (at cell centers)
+	kf = thermo.k();
+
+	// Initialize face conductivity with arithmetic interpolation
 	surfaceScalarField kfh("kf", fvc::interpolate(kf));
 
 	// Recalculate using harmonic interpolation if specified in case properties
