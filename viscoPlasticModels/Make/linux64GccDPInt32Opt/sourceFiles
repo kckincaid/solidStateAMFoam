@@ -1,5 +1,0 @@
-SOURCE = \
-NortonHoff/NortonHoff.C \
-SheppardWright/SheppardWright.C \
-
-# sources
