@@ -1,0 +1,4 @@
+NortonHoff/NortonHoff.C
+SheppardWright/SheppardWright.C
+
+LIB = $(FOAM_USER_LIBBIN)/libuserViscoPlasticModels
