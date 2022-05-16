@@ -1,9 +1,4 @@
 constantRotationalSlip/constantRotationalSlipFvPatchVectorField.C
-constantTemperatureConduction/constantTemperatureConductionFvPatchScalarField.C
-convection/convectionFvPatchScalarField.C
 exponentialRotationalSlip/exponentialRotationalSlipFvPatchVectorField.C
-frictionHeating/frictionHeatingFvPatchScalarField.C
-frictionRotationalSlip/frictionRotationalSlipFvPatchVectorField.C
-rotatingInlet/rotatingInletFvPatchVectorField.C
 
 LIB = $(FOAM_USER_LIBBIN)/libuserBoundaryConditions
