@@ -1,0 +1,4 @@
+constantRotationalSlip/constantRotationalSlipFvPatchVectorField.C
+exponentialRotationalSlip/exponentialRotationalSlipFvPatchVectorField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libuserBoundaryConditions

@@ -1,0 +1,9 @@
+derivedFvPatchFields/solidWallHeatFluxTemperature/solidWallHeatFluxTemperatureFvPatchScalarField.C
+derivedFvPatchFields/solidWallMixedTemperatureCoupled/solidWallMixedTemperatureCoupledFvPatchScalarField.C
+
+fluid/incompressibleCourantNo.C
+solid/solidRegionDiffNo.C
+incompressibleTwoPhaseThermalMixture/incompressibleTwoPhaseThermalMixture.C
+chtMultiRegionInterFoam.C
+
+EXE = $(FOAM_USER_APPBIN)/chtMultiRegionInterFoamDev
