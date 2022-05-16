@@ -15,3 +15,6 @@ The viscoplastic constitutive models are responsible for relating the effective 
 
 ## Boundary conditions
 A suite of boundary conditions has been implemented to reduce dependence on GroovyBC, a library included in the swak4FOAM add-on package. These include conditions for both heat transfer (temperature) as well as velocity for a number of applications.
+
+## Radiation
+A radiation model is incorporated into the code. Since fluids often have different absorption and emission properties, a two phase absorption / emission model was created to account for this. It is intended to work with the fvDOM method.
