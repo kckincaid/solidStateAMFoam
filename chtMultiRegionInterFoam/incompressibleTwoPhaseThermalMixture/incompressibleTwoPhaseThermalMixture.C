@@ -96,6 +96,7 @@ Foam::incompressibleTwoPhaseThermalMixture::incompressibleTwoPhaseThermalMixture
         )
     ),
 
+	// Constant densities
     rho1_("rho", dimDensity, nuModel1_->viscosityProperties()),
     rho2_("rho", dimDensity, nuModel2_->viscosityProperties()),
 
@@ -104,28 +105,8 @@ Foam::incompressibleTwoPhaseThermalMixture::incompressibleTwoPhaseThermalMixture
 	cp2_("cp", dimEnergy/dimMass/dimTemperature, nuModel2_->viscosityProperties()),
 
 	// Thermal conductivity models
-	//kModel1_("kModel", nuModel1_->viscosityProperties()),
-	//kModel2_("kModel", nuModel2_->viscosityProperties()),
-
 	kModel1_(nuModel1_->viscosityProperties().lookupOrDefault<word>("kModel","constant")),
 	kModel2_(nuModel2_->viscosityProperties().lookupOrDefault<word>("kModel","constant")),
-
-	//k10_("k0", dimPower/dimLength/dimTemperature, nuModel1_->viscosityProperties()),
-	//k11_("k1", dimPower/dimLength/dimTemperature/dimTemperature, nuModel1_->viscosityProperties()),
-	//k12_("k2", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature, nuModel1_->viscosityProperties()),
-	//k13_("k3", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature/dimTemperature, nuModel1_->viscosityProperties()),
-	//Tmax1_("Tmax", dimTemperature, nuModel1_->viscosityProperties()),
-	//Tmin1_("Tmin", dimTemperature, nuModel1_->viscosityProperties()),
-
-	//k20_("k0", dimPower/dimLength/dimTemperature, nuModel2_->viscosityProperties()),
-	//k21_("k1", dimPower/dimLength/dimTemperature/dimTemperature, nuModel2_->viscosityProperties()),
-	//k22_("k2", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature, nuModel2_->viscosityProperties()),
-	//k23_("k3", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature/dimTemperature, nuModel2_->viscosityProperties()),
-	//Tmax2_("Tmax", dimTemperature, nuModel2_->viscosityProperties()),
-	//Tmin2_("Tmin", dimTemperature, nuModel2_->viscosityProperties()),
-
-	//k1_("k", dimPower/dimLength/dimTemperature, nuModel1_->viscosityProperties()),
-	//k2_("k", dimPower/dimLength/dimTemperature, nuModel2_->viscosityProperties()),
 
     U_(U),
     phi_(phi),
@@ -230,8 +211,6 @@ Foam::incompressibleTwoPhaseThermalMixture::k1() const
 	// If cubic model, calculate based on temperature
 	if ( kModel1_ == "cubic" )
 	{
-		Info << "Entered mixture model cubic conductivity calc loop." << endl;
-
 		// Look up necessary constants
 		dimensionedScalar k10_("k0", dimPower/dimLength/dimTemperature, nuModel1_->viscosityProperties().lookup("k0"));
 		dimensionedScalar k11_("k1", dimPower/dimLength/dimTemperature/dimTemperature, nuModel1_->viscosityProperties().lookup("k1"));
@@ -239,13 +218,17 @@ Foam::incompressibleTwoPhaseThermalMixture::k1() const
 		dimensionedScalar k13_("k3", dimPower/dimLength/dimTemperature/dimTemperature/dimTemperature/dimTemperature, nuModel1_->viscosityProperties().lookup("k3"));
 		dimensionedScalar Tmax1_("Tmax", dimTemperature, nuModel1_->viscosityProperties().lookup("Tmax"));	
 		dimensionedScalar Tmin1_("Tmin", dimTemperature, nuModel1_->viscosityProperties().lookup("Tmin"));
+
+		// Create conversion from Kelvin to Celsius (solver uses Kelvin, cubic fit uses Celcius)
+		dimensionedScalar celsConv_("celsConv", dimTemperature, -273.0);
 	
-		// Create limited temperature field to prevent instabilities
+		// Create limited temperature field to prevent instabilities and convert to Celcius
 		const volScalarField limitedTemp_
 		(
-		    min(max(temp_, Tmin1_), Tmax1_)
+		    min(max(temp_, Tmin1_), Tmax1_) + celsConv_
 		);
 		
+		// Calculate and return temp-dependent thermal conductivity
 		return tmp<volScalarField>
     	(
 		    new volScalarField
@@ -255,14 +238,13 @@ Foam::incompressibleTwoPhaseThermalMixture::k1() const
 		    )
     	);
 	}
-	// Otherwise, use constant value
+	// If not cubic model, use constant value
 	else
 	{
-		Info << "Entered mixture model constant conductivity calc loop." << endl;
-		Info << "Conductivity model type is " << kModel1_ << endl;
-
+		// Look up constant value from dictionary
 		dimensionedScalar k1_("k", dimPower/dimLength/dimTemperature, nuModel1_->viscosityProperties().lookup("k"));
 
+		// Return a volScalarField with specified constant value
 		return tmp<volScalarField>
     	(
 		    new volScalarField
@@ -291,12 +273,16 @@ Foam::incompressibleTwoPhaseThermalMixture::k2() const
 		dimensionedScalar Tmax2_("Tmax", dimTemperature, nuModel2_->viscosityProperties().lookup("Tmax"));	
 		dimensionedScalar Tmin2_("Tmin", dimTemperature, nuModel2_->viscosityProperties().lookup("Tmin"));
 
-		// Create limited temperature field to prevent instabilities
+		// Create conversion from Kelvin to Celsius (solver uses Kelvin, cubic fit uses Celcius)
+		dimensionedScalar celsConv_("celsConv", dimTemperature, -273.0);
+
+		// Create limited temperature field to prevent instabilities and convert to Celsius
 		const volScalarField limitedTemp_
 		(
-		    min(max(temp_, Tmin2_), Tmax2_)
+		    min(max(temp_, Tmin2_), Tmax2_) + celsConv_
 		);
 		
+		// Calculate and return temp-dependent thermal conductivity
 		return tmp<volScalarField>
     	(
 		    new volScalarField
@@ -306,11 +292,13 @@ Foam::incompressibleTwoPhaseThermalMixture::k2() const
 		    )
     	);
 	}
-	// Otherwise, use constant value
+	// If not a cubic model, use constant value
 	else
 	{
+		// Look up constant value from dictionary
 		dimensionedScalar k2_("k", dimPower/dimLength/dimTemperature, nuModel2_->viscosityProperties().lookup("k"));
 
+		// Return a volScalarField with specified constant value
 		return tmp<volScalarField>
     	(
 		    new volScalarField
@@ -401,43 +389,6 @@ bool Foam::incompressibleTwoPhaseThermalMixture::read()
 			// Read thermal conductivity types
 			nuModel1_->viscosityProperties().lookup("kModel") >> kModel1_;
 			nuModel2_->viscosityProperties().lookup("kModel") >> kModel2_;
-
-			Info << "kModel1 is " << kModel1_ << endl;
-			Info << "kModel2 is " << kModel2_ << endl;
-
-			// Look up appropriate constants based on model type (constant or cubic)
-			if ( kModel1_ == "cubic" )
-			{
-				Info << "Entering kModel1 cubic if statement." << endl;
-				//nuModel1_->viscosityProperties().lookup("k0") >> k10_;
-				//nuModel1_->viscosityProperties().lookup("k1") >> k11_;
-				//nuModel1_->viscosityProperties().lookup("k2") >> k12_;
-				//nuModel1_->viscosityProperties().lookup("k3") >> k13_;
-				//nuModel1_->viscosityProperties().lookup("Tmax") >> Tmax1_;
-				//nuModel1_->viscosityProperties().lookup("Tmin") >> Tmin1_;
-			}
-			else
-			{
-				Info << "Entered kModel1 else statement." << endl;
-				//nuModel1_->viscosityProperties().lookup("k") >> k1_;
-			}
-
-			// Repeat for second fluid phase
-			if ( kModel2_ == "cubic" )
-			{
-				Info << "Entering kModel2 cubic if statement." << endl;
-				//nuModel2_->viscosityProperties().lookup("k0") >> k20_;
-				//nuModel2_->viscosityProperties().lookup("k1") >> k21_;
-				//nuModel2_->viscosityProperties().lookup("k2") >> k22_;
-				//nuModel2_->viscosityProperties().lookup("k3") >> k23_;
-				//nuModel2_->viscosityProperties().lookup("Tmax") >> Tmax2_;
-				//nuModel2_->viscosityProperties().lookup("Tmin") >> Tmin2_;
-			}
-			else
-			{
-				Info << "Entering kModel2 else statement." << endl;
-				//nuModel2_->viscosityProperties().lookup("k") >> k2_;
-			}
 
 			// Read in specific heats for each phase
 			nuModel1_->viscosityProperties().lookup("cp") >> cp1_;
