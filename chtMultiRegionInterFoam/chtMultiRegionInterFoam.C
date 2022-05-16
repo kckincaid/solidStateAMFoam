@@ -28,9 +28,9 @@ Group
     grpHeatTransferSolvers
 
 Description
-    Transient solver for incompressible, turbulent fluid flow with frictional
-	heat generation, and solid heat conduction with conjugate heat transfer 
-	between solid and fluid regions.
+    Transient solver for incompressible, turbulent fluid flow and solid 
+	heat conduction with conjugate heat transfer between solid and fluid 
+	regions.
 
     It handles secondary fluid or solid circuits which can be coupled
     thermally with the main fluid region. i.e radiators, etc.
@@ -39,9 +39,6 @@ Description
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"				// from pimplefoam - added for dym
-//#include "turbulentFluidThermoModel.H"
-//#include "rhoReactionThermo.H"
-//#include "CombustionModel.H"
 #include "singlePhaseTransportModel.H" 	// from pimplefoam
 #include "turbulentTransportModel.H" 	// from pimplefoam
 #include "fixedGradientFvPatchFields.H" // from pimplefoam
@@ -127,7 +124,6 @@ int main(int argc, char *argv[])
                 Info<< "\nSolving for solid region "
                     << solidRegions[i].name() << endl;
                 #include "setRegionSolidFields.H"
-                #include "readSolidMultiRegionPIMPLEControls.H"
                 #include "solveSolid.H"
             }
 
@@ -155,7 +151,6 @@ int main(int argc, char *argv[])
                         Info<< "\nSolving for solid region "
                             << solidRegions[i].name() << endl;
                         #include "setRegionSolidFields.H"
-                        #include "readSolidMultiRegionPIMPLEControls.H"
                         #include "solveSolid.H"
                     }
                 }
