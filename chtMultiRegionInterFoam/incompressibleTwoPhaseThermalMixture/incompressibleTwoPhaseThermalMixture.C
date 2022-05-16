@@ -104,7 +104,7 @@ Foam::incompressibleTwoPhaseThermalMixture::incompressibleTwoPhaseThermalMixture
 	cp1_("cp", dimEnergy/dimMass/dimTemperature, nuModel1_->viscosityProperties()),
 	cp2_("cp", dimEnergy/dimMass/dimTemperature, nuModel2_->viscosityProperties()),
 
-	// Thermal conductivity models
+	// Thermal conductivity models and units
 	kModel1_(nuModel1_->viscosityProperties().lookupOrDefault<word>("kModel","constant")),
 	kModel2_(nuModel2_->viscosityProperties().lookupOrDefault<word>("kModel","constant")),
 
@@ -219,8 +219,24 @@ Foam::incompressibleTwoPhaseThermalMixture::k1() const
 		dimensionedScalar Tmax1_("Tmax", dimTemperature, nuModel1_->viscosityProperties().lookup("Tmax"));	
 		dimensionedScalar Tmin1_("Tmin", dimTemperature, nuModel1_->viscosityProperties().lookup("Tmin"));
 
-		// Create conversion from Kelvin to Celsius (solver uses Kelvin, cubic fit uses Celcius)
+		// Look up units of fit function (Celsius or Kelvin)
+		word units1_(nuModel1_->viscosityProperties().lookupOrDefault<word>("units","Kelvin"));
+
+		// Declare conversion variable prior to setting value
 		dimensionedScalar celsConv_("celsConv", dimTemperature, -273.0);
+
+		// Set conversion to zero if cubic fit is already in Kelvin
+		if ( units1_ == "Kelvin" )
+		{
+			celsConv_ = 0.0;
+		}
+		else if ( units1_ != "Celsius" )
+		{
+            FatalErrorInFunction
+                << "Unknown conductivity function units " << units1_
+				<< " for phase 1. Choose Kelvin or Celsius."
+                << exit(FatalError);
+		}
 	
 		// Create limited temperature field to prevent instabilities and convert to Celcius
 		const volScalarField limitedTemp_
@@ -273,8 +289,24 @@ Foam::incompressibleTwoPhaseThermalMixture::k2() const
 		dimensionedScalar Tmax2_("Tmax", dimTemperature, nuModel2_->viscosityProperties().lookup("Tmax"));	
 		dimensionedScalar Tmin2_("Tmin", dimTemperature, nuModel2_->viscosityProperties().lookup("Tmin"));
 
-		// Create conversion from Kelvin to Celsius (solver uses Kelvin, cubic fit uses Celcius)
+		// Look up units of fit function (Celsius or Kelvin)
+		word units2_(nuModel2_->viscosityProperties().lookupOrDefault<word>("units","Kelvin"));
+
+		// Declare conversion variable prior to setting value
 		dimensionedScalar celsConv_("celsConv", dimTemperature, -273.0);
+
+		// Set conversion to zero if cubic fit is already in Kelvin
+		if ( units2_ == "Kelvin" )
+		{
+			celsConv_ = 0.0;
+		}
+		else if ( units2_ != "Celsius" )
+		{
+            FatalErrorInFunction
+                << "Unknown conductivity function units " << units2_
+				<< " for phase 2. Choose Kelvin or Celsius."
+                << exit(FatalError);
+		}
 
 		// Create limited temperature field to prevent instabilities and convert to Celsius
 		const volScalarField limitedTemp_
