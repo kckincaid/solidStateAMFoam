@@ -1,0 +1,155 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::stickModels::slipStick
+
+Description
+    A basic slip-stick model with constant or exponential prescribed
+	slip function.
+
+SourceFiles
+    slipStick.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef slipStick_H
+#define slipStick_H
+
+#include "stickModel.H"
+#include "dimensionedScalar.H"
+#include "volFields.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace stickModels
+{
+
+
+/*---------------------------------------------------------------------------*\
+                           Class slipStick Declaration
+\*---------------------------------------------------------------------------*/
+
+class slipStick
+:
+    public stickModel
+{
+    // Private data
+
+        dictionary slipStickCoeffs_;
+
+        dimensionedScalar mu0_;
+        dimensionedScalar lambda_;
+        dimensionedScalar omega_;
+        dimensionedScalar etaf_;
+		dimensionedScalar TC0_;
+		dimensionedScalar TC1_;
+		dimensionedScalar TC2_;
+		dimensionedScalar TC3_;
+		dimensionedScalar TC4_;
+
+
+
+protected:
+
+    // Protected data
+
+        volScalarField qvisc_;
+		volScalarField qfric_;
+
+
+    // Protected Member Functions
+
+        //- Calculate and return the heating terms
+        tmp<volScalarField> calcQvisc() const;
+		tmp<volScalarField> calcQfric() const;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("slipStick");
+
+
+    // Constructors
+
+        //- Construct from components
+        slipStick
+        (
+            const word& name,
+            const dictionary& stickProperties,
+            const volVectorField& U,
+            const volScalarField& alpha,
+			const volScalarField& p
+        );
+
+
+    //- Destructor
+    virtual ~slipStick()
+    {}
+
+
+    // Member Functions
+
+        //- Return the cell-centered viscous heating
+        virtual tmp<volScalarField> qvisc() const
+        {
+            return qvisc_;
+        }
+
+        //- Return the cell-centered viscous heating
+        virtual tmp<volScalarField> qfric() const
+        {
+            return qfric_;
+        }
+
+        //- Return the friction heating on the patch surface
+        virtual tmp<scalarField> qfric(const label patchi) const
+        {
+            return qfric_.boundaryField()[patchi];
+        }
+
+        //- Correct the heating terms
+        virtual void correct()
+        {
+            qvisc_ = calcQvisc();
+			qfric_ = calcQfric();
+        }
+
+        //- Read frictionProperties dictionary
+        virtual bool read(const dictionary& stickProperties);
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace stickModels
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //
