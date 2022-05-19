@@ -39,6 +39,7 @@ SourceFiles
 #include "stickModel.H"
 #include "dimensionedScalar.H"
 #include "volFields.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,15 +61,24 @@ class slipStick
 
         dictionary slipStickCoeffs_;
 
+		// Viscous heating premultiplier
+		dimensionedScalar phiVisc_;
+
+		// Friction quantities
+		word patch_;
         dimensionedScalar mu0_;
         dimensionedScalar lambda_;
-        dimensionedScalar omega_;
+        dimensionedVector omega_;
         dimensionedScalar etaf_;
+
+		// Temp-dependent max shear stress quantities
 		dimensionedScalar TC0_;
 		dimensionedScalar TC1_;
 		dimensionedScalar TC2_;
 		dimensionedScalar TC3_;
 		dimensionedScalar TC4_;
+		dimensionedScalar Tmax_;
+		dimensionedScalar Tmin_;
 
 
 
@@ -77,14 +87,20 @@ protected:
     // Protected data
 
         volScalarField qvisc_;
-		volScalarField qfric_;
+		surfaceScalarField qfric_;
 
 
     // Protected Member Functions
 
         //- Calculate and return the heating terms
         tmp<volScalarField> calcQvisc() const;
-		tmp<volScalarField> calcQfric() const;
+		tmp<surfaceScalarField> calcQfric() const;
+
+		// Other functions used in calculations
+		tmp<surfaceVectorField> r() const;
+		tmp<surfaceScalarField> delta() const;
+		tmp<surfaceScalarField> muf() const;
+		tmp<surfaceScalarField> tau() const;
 
 
 public:
@@ -120,15 +136,9 @@ public:
         }
 
         //- Return the cell-centered viscous heating
-        virtual tmp<volScalarField> qfric() const
+        virtual tmp<surfaceScalarField> qfric() const
         {
             return qfric_;
-        }
-
-        //- Return the friction heating on the patch surface
-        virtual tmp<scalarField> qfric(const label patchi) const
-        {
-            return qfric_.boundaryField()[patchi];
         }
 
         //- Correct the heating terms

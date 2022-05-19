@@ -96,10 +96,7 @@ public:
         virtual tmp<volScalarField> qvisc() const;
 
         //- Return the cell-center frictional heating
-        virtual tmp<volScalarField> qfric() const;
-
-        //- Return the fricitonal heating on the patch
-        virtual tmp<scalarField> qfric(const label patchi) const;
+        virtual tmp<surfaceScalarField> qfric() const;
 
         //- Correct the heating quantities
         virtual void correct();

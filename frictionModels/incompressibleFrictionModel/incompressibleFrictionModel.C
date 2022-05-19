@@ -74,17 +74,10 @@ Foam::incompressibleFrictionModel::qvisc() const
 }
 
 
-Foam::tmp<Foam::volScalarField>
+Foam::tmp<Foam::surfaceScalarField>
 Foam::incompressibleFrictionModel::qfric() const
 {
     return stickModelPtr_->qfric();
-}
-
-
-Foam::tmp<Foam::scalarField>
-Foam::incompressibleFrictionModel::qfric(const label patchi) const
-{
-    return stickModelPtr_->qfric(patchi);
 }
 
 
