@@ -40,6 +40,7 @@ namespace Foam
 Foam::incompressibleFrictionModel::incompressibleFrictionModel
 (
     const volVectorField& U,
+	const volVectorField& Ut,
     const volScalarField& alpha,
 	const volScalarField& p
 )
@@ -55,7 +56,7 @@ Foam::incompressibleFrictionModel::incompressibleFrictionModel
             IOobject::NO_WRITE
         )
     ),
-    stickModelPtr_(stickModel::New("qvisc", *this, U, alpha, p))
+    stickModelPtr_(stickModel::New("qvisc", *this, U, Ut, alpha, p))
 {}
 
 
@@ -74,7 +75,7 @@ Foam::incompressibleFrictionModel::qvisc() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField>
+Foam::tmp<Foam::volScalarField>
 Foam::incompressibleFrictionModel::qfric() const
 {
     return stickModelPtr_->qfric();

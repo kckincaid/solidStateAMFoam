@@ -35,7 +35,7 @@ SourceFiles
 #ifndef incompressibleFrictionModel_H
 #define incompressibleFrictionModel_H
 
-#include "frictionModel/frictionModel.H"
+#include "frictionModel.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
 
@@ -81,6 +81,7 @@ public:
         incompressibleFrictionModel
         (
             const volVectorField& U,
+			const volVectorField& Ut,
             const volScalarField& alpha,
 			const volScalarField& p
         );
@@ -96,7 +97,7 @@ public:
         virtual tmp<volScalarField> qvisc() const;
 
         //- Return the cell-center frictional heating
-        virtual tmp<surfaceScalarField> qfric() const;
+        virtual tmp<volScalarField> qfric() const;
 
         //- Correct the heating quantities
         virtual void correct();
