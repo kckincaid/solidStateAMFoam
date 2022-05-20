@@ -82,7 +82,7 @@ public:
         virtual tmp<volScalarField> qvisc() const = 0;
 
         //- Return the cell-centered frictional heating
-        virtual tmp<surfaceScalarField> qfric() const = 0;
+        virtual tmp<volScalarField> qfric() const = 0;
 
         //- Correct the frictional and viscous heating
         virtual void correct() = 0;
