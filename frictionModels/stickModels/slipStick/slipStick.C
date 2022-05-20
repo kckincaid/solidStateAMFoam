@@ -50,132 +50,116 @@ namespace stickModels
 Foam::tmp<Foam::volScalarField>
 Foam::stickModels::slipStick::calcQvisc() const
 {
-	// Import viscosity and effective strain rate fields
+	// Create pointers to viscosity and effective strain rate fields
 	const volScalarField& muEff_ = U_.mesh().lookupObject<volScalarField>("muEff");
 	const volScalarField& eDotEq_ = U_.mesh().lookupObject<volScalarField>("epsilonDotEq");
 
-	// Calculate and return viscous heating
-	//qvisc_ = 3.0*phiVisc_*muEff_*eDotEq_*eDotEq_;
-
-    //return qvisc_;
-	return(3.0*phiVisc_*muEff_*eDotEq_*eDotEq_);
+    // Return viscous heating
+	return(3.0*phiVisc_*muEff_*pow(eDotEq_, 2));
 }
 
 // Calculate frictional heating on patch
-Foam::tmp<Foam::surfaceScalarField>
+Foam::tmp<Foam::volScalarField>
 Foam::stickModels::slipStick::calcQfric() const
 {
-	// Create face-interpolated phase fraction and pressure
-	surfaceScalarField alphaf_
-    (
-        fvc::interpolate(min(max(alpha_, scalar(0)), scalar(1)))
-    );
+	// Create vector field of distance from patch center
+	volVectorField rad_ = r();
 
-	surfaceScalarField pf_
-    (
-        fvc::interpolate(p_)
-    );
+	// Create a volScalarField with a value of 1 for cells adjacent to friction
+	// patch and a value of 0 for all other cells
+	volScalarField fricCell_ = alpha_*0.0;
 
-	// Create unity value scalar field
-	surfaceScalarField one_ = alphaf_/(alphaf_+VSMALL);
+	// Get patch info
+	scalar patchNum_ = U_.mesh().boundaryMesh().findPatchID(patch_);
+	const polyPatch& currPatch_ = U_.mesh().boundaryMesh()[patchNum_];
 
-	//qfric_ = alphaf_*((one_-delta())*etaf_*tau() + delta()*muf()*pf_)
-	  	   //* (mag(omega_)*r()); // add in Vt sin theta contribution
+	// Loop over faces on patch
+	forAll(currPatch_, facei_)
+	{
+		label faceCelli_ = currPatch_.faceCells()[facei_];
 
-	// Calculate and return frictional heating field
-    //return qfric_;
+		// Set fricCell to 1.0 in cells adjacent to patch
+		fricCell_[faceCelli_] = 1.0;
+	}
+
+	// Return frictional heating
 	return
 	(
-		alphaf_*((one_-delta())*etaf_*tau() + delta()*muf()*pf_)
-	  * (mag(omega_)*mag(r())) // add in Vt sin theta contribution
+		fricCell_*alpha_*((scalar(1)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
+	  * (mag(omega_)*mag(rad_) - (Ut_ & rad_)/mag(rad_))
 	);
 }
 
-// Calculate distance from center of patch
-Foam::tmp<Foam::surfaceVectorField>
+// Calculate distance from center of patch as a vector field
+Foam::tmp<Foam::volVectorField>
 Foam::stickModels::slipStick::r() const
 {
-	// Get patch info
-	const scalar patchNum_ = U_.mesh().boundaryMesh().findPatchID(patch_);
+	// Get info for patch
+	scalar patchNum_ = U_.mesh().boundaryMesh().findPatchID(patch_);
 	const polyPatch& currPatch_ = U_.mesh().boundaryMesh()[patchNum_];
 
 	// Initialize center vector and area
 	vector patchCenter_ = Zero;
 	scalar patchArea_ = VSMALL;
 
-	// Create pointers to face surface area and centers (used by both loops)
+	// Create pointers to face surface area and centers
 	const surfaceScalarField& magSf_ = U_.mesh().magSf();
-	const surfaceVectorField& Cf_ = U_.mesh().Cf();
+	const surfaceVectorField& Cf_ = U_.mesh().Cf();	
 
 	// Calculate area-weighted patch center
 	forAll(currPatch_, facei_)
 	{
+		// Add area-weighted face center and face area to totals
 		patchCenter_ += Cf_.boundaryField()[patchNum_][facei_]*magSf_.boundaryField()[patchNum_][facei_];
 		patchArea_ += magSf_.boundaryField()[patchNum_][facei_];
 	}
 
-	// Sum over all processors
+	// Perform calculation for all processors in decomposed case
 	reduce(patchCenter_, sumOp<vector>());
 	reduce(patchArea_, sumOp<scalar>());
 
 	// Calculate patch centroid
 	patchCenter_ = patchCenter_ / patchArea_;
-
-	// Create surfaceScalarField of patch center
-	surfaceVectorField c_(patchCenter_*magSf_/magSf_);
-
-	// Return info on patch center location
 	Info << "Center for patch " << patch_ << " found to be at " << patchCenter_ << endl;
 
-    return(Cf_ - c_);
+	// Create a dimensioned vector from patchCenter vector
+	dimensionedVector C_("C", dimLength, patchCenter_);
+
+	// Return distance from patch centroid
+	return(U_.mesh().C() - C_);	
 }
 
-// Calculate slip fraction
-Foam::tmp<Foam::surfaceScalarField>
-Foam::stickModels::slipStick::delta() const
+// Calculate slip fraction as a volScalarField
+Foam::tmp<Foam::volScalarField>
+Foam::stickModels::slipStick::delta(const volVectorField r_) const
 {
-	// Calculate patch velocity
-	surfaceVectorField Up_
-	(
-		omega_^r()
-	);
-
-	// Calculate slip fraction bsed on actual velocity
-	const surfaceVectorField Uf_ = fvc::interpolate(U_);
-
-	surfaceScalarField delta_ = mag(Up_ - Uf_);
-
-    return delta_;
+	return(mag(U_)/mag(r_^omega_));	
 }
 
-// Calculate friction coefficient
-Foam::tmp<Foam::surfaceScalarField>
-Foam::stickModels::slipStick::muf() const
+// Calculate friction coefficient as a volScalarField
+Foam::tmp<Foam::volScalarField>
+Foam::stickModels::slipStick::muf(const volVectorField r_) const
 {
-	return
-	(
-		mu0_*exp(-lambda_*delta()*mag(omega_)*mag(r()))
-	);
+	return(mu0_*exp(-lambda_*delta(r_)*mag(omega_)*mag(r_)));	
 }
 
-// Calculate temp-dependent max shear stress
-Foam::tmp<Foam::surfaceScalarField>
+// Calculate maximum shear stress as a volScalarField
+Foam::tmp<Foam::volScalarField>
 Foam::stickModels::slipStick::tau() const
 {
-	// Import and limit temperature
+	// Create pointer to temp field and create limited temp
 	const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
 
-	const surfaceScalarField tempLim_
+	const volScalarField TLim_
 	(
-		fvc::interpolate(min(max(temp_, Tmin_), Tmax_))
+		min(max(temp_, Tmin_), Tmax_)
 	);
 
-	// Calculate and return max shear stress
 	return
 	(
-		TC0_*tempLim_/tempLim_ + TC1_*tempLim_ + TC2_*pow(tempLim_, 2)
-	  + TC3_*pow(tempLim_, 3) + TC4_*pow(tempLim_, 4)
-	);
+		TC0_*TLim_/TLim_ + TC1_*TLim_ + TC2_*pow(TLim_, 2) 
+	  + TC3_*pow(TLim_, 3) + TC4_*pow(TLim_, 4)
+	);	
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -185,11 +169,12 @@ Foam::stickModels::slipStick::slipStick
     const word& name,
     const dictionary& stickProperties,
     const volVectorField& U,
-    const volScalarField& alpha,
+    const volVectorField& Ut,
+	const volScalarField& alpha,
 	const volScalarField& p
 )
 :
-    stickModel(name, stickProperties, U, alpha, p),
+    stickModel(name, stickProperties, U, Ut, alpha, p),
     slipStickCoeffs_(stickProperties.optionalSubDict(typeName + "Coeffs")),
 
 	phiVisc_("phiVisc", dimless, slipStickCoeffs_),

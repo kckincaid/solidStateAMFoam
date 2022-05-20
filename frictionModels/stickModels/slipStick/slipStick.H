@@ -25,8 +25,9 @@ Class
     Foam::stickModels::slipStick
 
 Description
-    A basic slip-stick model with constant or exponential prescribed
-	slip function.
+    A basic slip-stick model which works with an arbitary slip boundary condition
+	(e.g. constant, exponential, etc.) and a constant or exponential friction
+	coefficient.
 
 SourceFiles
     slipStick.C
@@ -38,6 +39,7 @@ SourceFiles
 
 #include "stickModel.H"
 #include "dimensionedScalar.H"
+#include "dimensionedVector.H"
 #include "volFields.H"
 #include "fvc.H"
 
@@ -81,26 +83,25 @@ class slipStick
 		dimensionedScalar Tmin_;
 
 
-
 protected:
 
     // Protected data
 
         volScalarField qvisc_;
-		surfaceScalarField qfric_;
+		volScalarField qfric_;
 
 
     // Protected Member Functions
 
         //- Calculate and return the heating terms
         tmp<volScalarField> calcQvisc() const;
-		tmp<surfaceScalarField> calcQfric() const;
+		tmp<volScalarField> calcQfric() const;
 
-		// Other functions used in calculations
-		tmp<surfaceVectorField> r() const;
-		tmp<surfaceScalarField> delta() const;
-		tmp<surfaceScalarField> muf() const;
-		tmp<surfaceScalarField> tau() const;
+		//- Other functions used in calculations
+		tmp<volVectorField> r()	const;
+		tmp<volScalarField> delta(const volVectorField r_) const;
+		tmp<volScalarField> muf(const volVectorField r_) const;
+		tmp<volScalarField> tau() const;
 
 
 public:
@@ -117,6 +118,7 @@ public:
             const word& name,
             const dictionary& stickProperties,
             const volVectorField& U,
+			const volVectorField& Ut,
             const volScalarField& alpha,
 			const volScalarField& p
         );
@@ -136,7 +138,7 @@ public:
         }
 
         //- Return the cell-centered viscous heating
-        virtual tmp<surfaceScalarField> qfric() const
+        virtual tmp<volScalarField> qfric() const
         {
             return qfric_;
         }
