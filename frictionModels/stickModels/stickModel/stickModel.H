@@ -74,6 +74,7 @@ protected:
         dictionary stickProperties_;
 
         const volVectorField& U_;
+		const volVectorField& Ut_;
         const volScalarField& alpha_;
 		const volScalarField& p_;
 
@@ -104,10 +105,11 @@ public:
                 const word& name,
                 const dictionary& stickProperties,
                 const volVectorField& U,
+				const volVectorField& Ut,
                 const volScalarField& alpha,
 				const volScalarField& p
             ),
-            (name, stickProperties, U, alpha, p)
+            (name, stickProperties, U, Ut, alpha, p)
         );
 
 
@@ -119,6 +121,7 @@ public:
             const word& name,
             const dictionary& stickProperties,
             const volVectorField& U,
+			const volVectorField& Ut,
             const volScalarField& alpha,
 			const volScalarField& p
         );
@@ -132,6 +135,7 @@ public:
             const word& name,
             const dictionary& stickProperties,
             const volVectorField& U,
+			const volVectorField& Ut,
             const volScalarField& alpha,
 			const volScalarField& p
         );
@@ -157,7 +161,7 @@ public:
         virtual tmp<volScalarField> qvisc() const = 0;
 
 		//- Return the cell-centered frictional heating
-		virtual tmp<surfaceScalarField> qfric() const = 0;
+		virtual tmp<volScalarField> qfric() const = 0;
 
         //- Correct the heating quantities
         virtual void correct() = 0;

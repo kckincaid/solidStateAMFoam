@@ -34,6 +34,7 @@ Foam::autoPtr<Foam::stickModel> Foam::stickModel::New
     const word& name,
     const dictionary& stickProperties,
     const volVectorField& U,
+	const volVectorField& Ut,
     const volScalarField& alpha,
 	const volScalarField& p
 )
@@ -55,7 +56,7 @@ Foam::autoPtr<Foam::stickModel> Foam::stickModel::New
     }
 
     return autoPtr<stickModel>
-        (cstrIter()(name, stickProperties, U, alpha, p));
+        (cstrIter()(name, stickProperties, U, Ut, alpha, p));
 }
 
 
