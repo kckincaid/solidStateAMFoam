@@ -13,5 +13,11 @@ The mixture class is a critical accessory to the solver, calculating the thermop
 ## Viscoplastic models
 The viscoplastic constitutive models are responsible for relating the effective viscosity of the build material to its state. Specifically, two models are implemented in which the viscosity depends on the strain rate and temperature of the material. The first of these is the Sheppard-Wright (a.k.a. Sellars-Tegart) model, which has been extensively used in other hot working applications (e.g. friction stir welding) and was shown to provide excellent results in this application as well. The other implemented model is Norton-Hoff with constant coefficients, which is largely untested at this point and is expected to provide worse results.
 
+## Friction model class: incompressibleFrictionModel
+This class calculates the viscous and frictional heating terms present in solid-state processes. While the actual degree of slip is calculated by the boundary condition, the class is able to determine the slip fraction from the velocity field and determine the appropriate ratio of frictional heating and plastic dissipation at the tool/workpiece interface. The friction coefficient is implemented as an exponential function, but can be set to constant by changing the appropriate model parameters.
+
 ## Boundary conditions
 A suite of boundary conditions has been implemented to reduce dependence on GroovyBC, a library included in the swak4FOAM add-on package. These include conditions for both heat transfer (temperature) as well as velocity for a number of applications.
+
+## Radiation
+The solver incorporates radiation for solving heat transfer in extreme conditions. A two phase absorption / emission model was created to work with the VOF solver to allow different radiative properties for the two phases.
