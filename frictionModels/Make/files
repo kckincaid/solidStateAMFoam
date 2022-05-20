@@ -5,4 +5,4 @@ stickModels/slipStick/slipStick.C
 frictionModel/frictionModel.C
 incompressibleFrictionModel/incompressibleFrictionModel.C
 
-LIB = $(FOAM_USER_LIBBIN)/libincompressibleFrictionModels
+LIB = $(FOAM_USER_LIBBIN)/libuserincompressibleFrictionModels
