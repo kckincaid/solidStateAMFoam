@@ -39,15 +39,15 @@ PtrList<volScalarField> cpFluid(fluidRegions.size());
 
 // Quartic temp-dependent max shear stress coeffs
 // Correlation is for temp (K) to max shear stress (MPa)
-PtrList<dimensionedScalar> TC0Fluid(fluidRegions.size());
-PtrList<dimensionedScalar> TC1Fluid(fluidRegions.size());
-PtrList<dimensionedScalar> TC2Fluid(fluidRegions.size());
-PtrList<dimensionedScalar> TC3Fluid(fluidRegions.size());
-PtrList<dimensionedScalar> TC4Fluid(fluidRegions.size());
-PtrList<dimensionedScalar> TminFluid(fluidRegions.size());
-PtrList<dimensionedScalar> TmaxFluid(fluidRegions.size());
-PtrList<dimensionedScalar> tauminFluid(fluidRegions.size());
-PtrList<dimensionedScalar> taumaxFluid(fluidRegions.size());
+//PtrList<dimensionedScalar> TC0Fluid(fluidRegions.size());
+//PtrList<dimensionedScalar> TC1Fluid(fluidRegions.size());
+//PtrList<dimensionedScalar> TC2Fluid(fluidRegions.size());
+//PtrList<dimensionedScalar> TC3Fluid(fluidRegions.size());
+//PtrList<dimensionedScalar> TC4Fluid(fluidRegions.size());
+//PtrList<dimensionedScalar> TminFluid(fluidRegions.size());
+//PtrList<dimensionedScalar> TmaxFluid(fluidRegions.size());
+//PtrList<dimensionedScalar> tauminFluid(fluidRegions.size());
+//PtrList<dimensionedScalar> taumaxFluid(fluidRegions.size());
 
 // Stress and strain-related variables
 List<bool> trackStressStrainl(fluidRegions.size());
@@ -68,15 +68,18 @@ PtrList<radiation::radiationModel> radiationFluid(fluidRegions.size());
 List<label> pRefCellFluid(fluidRegions.size(),0);
 List<scalar> pRefValueFluid(fluidRegions.size(),0.0);
 
+// Frictional heating model
+PtrList<incompressibleFrictionModel> frictionModelFluid(fluidRegions.size());
+
 // Frictional heat generation terms
-List<word> slipTypel(fluidRegions.size());					// Type of condition to apply at slip faces
-PtrList<dimensionedScalar> etafl(fluidRegions.size());		// Mechanical efficiency of frictional heating
-PtrList<dimensionedScalar> omegal(fluidRegions.size());		// Angular velocity
-PtrList<dimensionedScalar> omega0l(fluidRegions.size());	// Model constant
-PtrList<dimensionedScalar> delta0l(fluidRegions.size());	// Model constant
-PtrList<dimensionedScalar> Rsl(fluidRegions.size());		// Tool shoulder diameter
-PtrList<dimensionedScalar> mu0l(fluidRegions.size());		// Model constant
-PtrList<dimensionedScalar> lambdal(fluidRegions.size());	// Model constant
+//List<word> slipTypel(fluidRegions.size());					// Type of condition to apply at slip faces
+//PtrList<dimensionedScalar> etafl(fluidRegions.size());		// Mechanical efficiency of frictional heating
+//PtrList<dimensionedScalar> omegal(fluidRegions.size());		// Angular velocity
+//PtrList<dimensionedScalar> omega0l(fluidRegions.size());	// Model constant
+//PtrList<dimensionedScalar> delta0l(fluidRegions.size());	// Model constant
+//PtrList<dimensionedScalar> Rsl(fluidRegions.size());		// Tool shoulder diameter
+//PtrList<dimensionedScalar> mu0l(fluidRegions.size());		// Model constant
+//PtrList<dimensionedScalar> lambdal(fluidRegions.size());	// Model constant
 PtrList<volScalarField> qfricl(fluidRegions.size());		// Frictional heat field used in temperature BC
 
 // Dynamic Mesh control variables
@@ -186,7 +189,7 @@ forAll(fluidRegions, i)
         )
     );
 
-    Info<< "    Adding to viscous heating qvisc\n" << endl;
+    Info<< "    Creating viscous heating qvisc\n" << endl;
     qviscl.set
     (
         i,
@@ -540,19 +543,59 @@ forAll(fluidRegions, i)
 	);
 
 	// Viscous heating coefficient
-	phiViscl.set
+/*	phiViscl.set*/
+/*	(*/
+/*		i,*/
+/*		new dimensionedScalar*/
+/*		(*/
+/*			"phiVisc",*/
+/*			dimless,*/
+/*			transportPropertiesl[i].lookup("phiVisc")*/
+/*		)*/
+/*	);*/
+
+    Info<< "    Creating stickModel for fluid\n" << endl;
+/*    frictionModelFluid.set*/
+/*    (*/
+/*        i,*/
+/*		autoPtr<incompressibleFrictionModel>*/
+/*		(*/
+/*		    incompressibleFrictionModel::New*/
+/*		    (*/
+/*		        UFluid[i],*/
+/*		        UtFluid[i],*/
+/*		        alpha1l[i],*/
+/*				p_rghFluid[i]*/
+/*			)*/
+/*		).ptr()*/
+/*    );*/
+
+	frictionModelFluid.set
 	(
 		i,
-		new dimensionedScalar
+		new incompressibleFrictionModel(UFluid[i], UtFluid[i], alpha1l[i], p_rghFluid[i])
+	);
+
+	// Create viscous heating field
+	qfricl.set
+	(
+		i,
+		new volScalarField
 		(
-			"phiVisc",
-			dimless,
-			transportPropertiesl[i].lookup("phiVisc")
+		    IOobject
+		    (
+		        "qfric",
+		        runTime.timeName(),
+		        fluidRegions[i],
+		        IOobject::MUST_READ,
+		        IOobject::AUTO_WRITE
+		    ),
+		    fluidRegions[i]
 		)
 	);
 
 	// Create slip and frictional heat generation terms
-	#include "createFrictionalHeating.H"
+	//#include "createFrictionalHeating.H"
 
 	// Create stress and strain variables if desired
 	#include "createStressStrain.H"
