@@ -85,8 +85,8 @@ Foam::stickModels::slipStick::calcQfric() const
 	// Return frictional heating
 	return
 	(
-		fricCell_*alpha_*((scalar(1)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
-	  * (mag(omega_)*mag(rad_) - (Ut_ & rad_)/mag(rad_))
+		fricCell_*alpha_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
+	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)))))
 	);
 }
 
@@ -133,7 +133,11 @@ Foam::stickModels::slipStick::r() const
 Foam::tmp<Foam::volScalarField>
 Foam::stickModels::slipStick::delta(const volVectorField r_) const
 {
-	return(mag(U_)/mag(r_^omega_));	
+	//return(mag(U_)/mag(r_^omega_));
+	return
+	(
+		scalar(1.0) - exp(-mag(omega_)*mag(r_)/(delta0_*omega0_*Rs_))
+	);	
 }
 
 // Calculate friction coefficient as a volScalarField
@@ -185,6 +189,10 @@ Foam::stickModels::slipStick::slipStick
     omega_("omega", dimless/dimTime, slipStickCoeffs_),
     etaf_("etaf", dimless, slipStickCoeffs_),
 
+	delta0_("delta0", dimless, slipStickCoeffs_),
+	omega0_("omega0", dimless/dimTime, slipStickCoeffs_),
+	Rs_("Rs", dimLength, slipStickCoeffs_),
+
     TC0_("TC0", dimPressure, slipStickCoeffs_),
     TC1_("TC1", dimPressure/dimTemperature, slipStickCoeffs_),
     TC2_("TC2", dimPressure/pow(dimTemperature,2), slipStickCoeffs_),
@@ -212,11 +220,11 @@ Foam::stickModels::slipStick::slipStick
         (
             "qfric",
             U_.time().timeName(),
-            U_.db(),
-            IOobject::NO_READ,
+            U_.mesh(),
+            IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-    calcQfric()
+    U_.mesh()
     )
 {}
 
@@ -239,6 +247,10 @@ bool Foam::stickModels::slipStick::read
     slipStickCoeffs_.lookup("lambda") >> lambda_;
     slipStickCoeffs_.lookup("omega") >> omega_;
     slipStickCoeffs_.lookup("etaf") >> etaf_;
+
+	slipStickCoeffs_.lookup("delta0") >> delta0_;
+	slipStickCoeffs_.lookup("omega0") >> omega0_;
+	slipStickCoeffs_.lookup("Rs") >> Rs_;
 
 	slipStickCoeffs_.lookup("TC0") >> TC0_;
 	slipStickCoeffs_.lookup("TC1") >> TC1_;

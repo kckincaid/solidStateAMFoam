@@ -73,6 +73,11 @@ class slipStick
         dimensionedVector omega_;
         dimensionedScalar etaf_;
 
+		// Slip quantities
+		dimensionedScalar delta0_;
+		dimensionedScalar omega0_;
+		dimensionedScalar Rs_;
+
 		// Temp-dependent max shear stress quantities
 		dimensionedScalar TC0_;
 		dimensionedScalar TC1_;
@@ -132,13 +137,13 @@ public:
     // Member Functions
 
         //- Return the cell-centered viscous heating
-        virtual tmp<volScalarField> qvisc() const
+        tmp<volScalarField> qvisc() const
         {
             return qvisc_;
         }
 
         //- Return the cell-centered viscous heating
-        virtual tmp<volScalarField> qfric() const
+        tmp<volScalarField> qfric() const
         {
             return qfric_;
         }
@@ -148,6 +153,7 @@ public:
         {
             qvisc_ = calcQvisc();
 			qfric_ = calcQfric();
+			qfric_.correctBoundaryConditions();
         }
 
         //- Read frictionProperties dictionary
