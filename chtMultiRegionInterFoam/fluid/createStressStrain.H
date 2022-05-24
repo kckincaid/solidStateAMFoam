@@ -4,7 +4,7 @@ transportPropertiesl[i].readIfPresent("trackStressStrain", trackStressStrainl[i]
 // Read in variables if strain tracking desired
 if (trackStressStrainl[i])
 {
-    Info<< "Creating stress and strain for region " << fluidRegions[i].name() << nl << endl;
+    Info<< "	Creating stress and strain for region " << fluidRegions[i].name() << nl << endl;
 
     // Zener-Hollomon parameter
     ZFluid.set
