@@ -29,12 +29,14 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
 	-I$(LIB_SRC)/dynamicFvMesh/lnInclude \
-	-I$(LIB_SRC)/dynamicMesh/lnInclude
+	-I$(LIB_SRC)/dynamicMesh/lnInclude \
+	-I$(FOAM_USER_LIBBIN)/../../../src/frictionModels/lnInclude
 
 
 EXE_LIBS = \
 	-L$(FOAM_USER_LIBBIN) \
     -luserimmiscibleIncompressibleTwoPhaseThermalMixtureDev1 \
+	-luserincompressibleFrictionModels \
     -lincompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \
