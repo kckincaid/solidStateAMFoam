@@ -104,9 +104,12 @@ Foam::viscosityModels::FKS::Theta(const volScalarField Th_) const
 Foam::tmp<Foam::volScalarField>
 Foam::viscosityModels::FKS::Tstar(const volScalarField T_) const
 {
+	// Create limited temperature field
+	volScalarField Tlim_ = min(max(T_, Ta_), Tm_);
+
     return
     (
-		(T_ - Ta_)/(Tm_ - Ta_)
+		(Tlim_ - Ta_)/(Tm_ - Ta_)
     );
 }
 
