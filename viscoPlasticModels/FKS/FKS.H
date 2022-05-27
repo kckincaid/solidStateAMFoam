@@ -79,6 +79,9 @@ class FKS
 		dimensionedScalar Tm_;
 		dimensionedScalar Ta_;
 
+		// Material density
+		dimensionedScalar rho_;
+
 protected:
 
     // Protected data
@@ -88,6 +91,7 @@ protected:
     // Protected Member Functions
 
 		//- Calculate and return the strain hardening function
+		//tmp<volScalarField> H() const;
 		tmp<volScalarField> H() const;
 
 		//- Calculate and return the strain rate stiffening function
@@ -100,7 +104,7 @@ protected:
 		tmp<volScalarField> Tstar(const volScalarField T_) const;
 
 		// Calculate and return the flow stress
-		tmp<VolScalarField> sigmaf() const;
+		tmp<volScalarField> sigmaf() const;
 
         //- Calculate and return the laminar viscosity
         tmp<volScalarField> calcNu() const;

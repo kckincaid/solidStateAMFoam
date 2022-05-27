@@ -48,36 +48,48 @@ namespace viscosityModels
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 // Calculate the strain hardening contribution
+//Foam::tmp<Foam::volScalarField>
+//Foam::viscosityModels::FKS::H() const
+//{
+//	// Import strain rate and plastic strain fields
+//	const volScalarField& edot_ = U_.mesh().lookupObject<volScalarField>("epsilonDotEq");
+//	const volScalarField& ep_ = U_.mesh().lookupObject<volScalarField>("epsilonEq");
+
+//    return
+//	(
+//		a1_*(edot_/edot_) + a2_*atan(a3_*ep_)
+//	);
+//}
 Foam::tmp<Foam::volScalarField>
 Foam::viscosityModels::FKS::H() const
 {
-	// Import temperature field
-	const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
+	// Import strain rate field
+	const volScalarField& edot_ = U_.mesh().lookupObject<volScalarField>("epsilonDotEq");
 
     return
 	(
-		// Create unity value volume field with T/T then multiply by value of H 
-		// at saturated plastic strain. Note that atan(x) --> pi/2 when x >> 1
-		(temp_/temp_)*(a1_ + a2_*1.571)
+		// Return a scalar field equivalent to the strain hardening contribution at full
+		// saturation. Note that atan(x) --> pi/2 when x >> 1
+		(a1_ + a2_*1.571)*edot_/edot_
 	);
 }
 
 // Calculate the strain rate stiffening contribution
 Foam::tmp<Foam::volScalarField>
-Foam::viscosityModels::FKS::Lambda(Th_) const
+Foam::viscosityModels::FKS::Lambda(const volScalarField Th_) const
 {
 	// Import strain rate field
 	const volScalarField& edot_ = U_.mesh().lookupObject<volScalarField>("epsilonDotEq");
 
     return
     (
-		1.0 + (b1_*pow(Th_, b2_))*(b3_*ln(edot_/e0_))
+		1.0 + (b1_*pow(Th_, b2_))*(b3_*Foam::log(edot_/e0_))
     );
 }
 
 // Calculate the thermal softening contribution
 Foam::tmp<Foam::volScalarField>
-Foam::viscosityModels::FKS::Theta(Th_) const
+Foam::viscosityModels::FKS::Theta(const volScalarField Th_) const
 {
     return
     (
@@ -87,7 +99,7 @@ Foam::viscosityModels::FKS::Theta(Th_) const
 
 // Calculate the homologous temperature
 Foam::tmp<Foam::volScalarField>
-Foam::viscosityModels::FKS::Tstar(T_) const
+Foam::viscosityModels::FKS::Tstar(const volScalarField T_) const
 {
     return
     (
@@ -165,6 +177,8 @@ Foam::viscosityModels::FKS::FKS
 	Tm_("Tm", dimTemperature, FKSCoeffs_),
 	Ta_("Ta", dimTemperature, FKSCoeffs_),
 
+	rho_("rho", dimDensity, FKSCoeffs_),
+
     nu_
     (
         IOobject
@@ -204,6 +218,8 @@ bool Foam::viscosityModels::FKS::read
     FKSCoeffs_.lookup("c2") >> c2_;
     FKSCoeffs_.lookup("Tm") >> Tm_;
     FKSCoeffs_.lookup("Ta") >> Ta_;
+
+	FKSCoeffs_.lookup("rho") >> rho_;
 
     return true;
 }
