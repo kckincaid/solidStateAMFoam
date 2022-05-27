@@ -64,13 +64,13 @@ Foam::tmp<Foam::volScalarField>
 Foam::viscosityModels::FKS::H() const
 {
 	// Import strain rate field
-	const volScalarField& edot_ = U_.mesh().lookupObject<volScalarField>("epsilonDotEq");
+	const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
 
     return
 	(
 		// Return a scalar field equivalent to the strain hardening contribution at full
 		// saturation. Note that atan(x) --> pi/2 when x >> 1
-		(a1_ + a2_*1.571)*edot_/edot_
+		(a1_ + a2_*1.571)*temp_/temp_
 	);
 }
 
@@ -81,9 +81,12 @@ Foam::viscosityModels::FKS::Lambda(const volScalarField Th_) const
 	// Import strain rate field
 	const volScalarField& edot_ = U_.mesh().lookupObject<volScalarField>("epsilonDotEq");
 
+	// Create smol temp value
+	dimensionedScalar Ts_("Ts", dimless, SMALL);
+
     return
     (
-		1.0 + (b1_*pow(Th_, b2_))*(b3_*Foam::log(edot_/e0_))
+		1.0 + (b1_*pow((Th_ + Ts_), b2_))*(b3_*Foam::log(edot_/e0_ + VSMALL))
     );
 }
 
