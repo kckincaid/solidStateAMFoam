@@ -82,11 +82,13 @@ Foam::stickModels::slipStick::calcQfric() const
 		fricCell_[faceCelli_] = 1.0;
 	}
 
+	dimensionedScalar ASMALL("VVSMALL", dimVelocity*dimLength, SMALL);
+
 	// Return frictional heating
 	return
 	(
 		fricCell_*alpha_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
-	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)))))
+	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)+ASMALL))))
 	);
 }
 
