@@ -15,13 +15,13 @@ if (finalIter)
 		// If temp is above maximum temperature, limit conductivity to value at Tmax
 		if ( temp[celli] > Tmax.value() )
 		{
-			k = k0s*(Tmax/Tmax) + k1s*(Tmax+celsConv) + k2s*pow(Tmax+celsConv,2) + k3s*pow(Tmax+celsConv,3);
+			k[celli] = (k0s*(Tmax/Tmax) + k1s*(Tmax+celsConv) + k2s*pow(Tmax+celsConv,2) + k3s*pow(Tmax+celsConv,3)).value();
 		}
 		
 		// If temp is below minumum temperature, limit conductivity to value at Tmin
 		if ( temp[celli] < Tmin.value() )
 		{
-			k = k0s*(Tmin/Tmin) + k1s*(Tmin+celsConv) + k2s*pow(Tmin+celsConv,2) + k3s*pow(Tmin+celsConv,3);
+			k[celli] = (k0s*(Tmin/Tmin) + k1s*(Tmin+celsConv) + k2s*pow(Tmin+celsConv,2) + k3s*pow(Tmin+celsConv,3)).value();
 		}
 	}
 
