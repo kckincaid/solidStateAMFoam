@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,30 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "immiscibleIncompressibleTwoPhaseThermalMixture.H"
+#include "frictionModel.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(frictionModel, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::immiscibleIncompressibleTwoPhaseThermalMixture::
-immiscibleIncompressibleTwoPhaseThermalMixture
-(
-    const volVectorField& U,
-    const surfaceScalarField& phi
-)
-:
-    incompressibleTwoPhaseThermalMixture(U, phi),
-    interfaceProperties(alpha1(), U, *this)
+Foam::frictionModel::frictionModel()
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::frictionModel::~frictionModel()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::immiscibleIncompressibleTwoPhaseThermalMixture::read()
+bool Foam::frictionModel::read()
 {
-    return
-        incompressibleTwoPhaseThermalMixture::read()
-     && interfaceProperties::read();
+    return true;
 }
 
 

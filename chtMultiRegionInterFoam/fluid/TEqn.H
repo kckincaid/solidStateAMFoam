@@ -1,15 +1,12 @@
 {
-	// Calculate frictional heating for boundary conditions
-	#include "calculateFrictionalHeating.H"
-
-	// Calculate effective viscosity
-	muEff = thermo.mu();
-
 	// Calculate equivalent strain rate
 	epsilonDotEq = Foam::sqrt(2.0/3.0)*mag(symm(fvc::grad(U)));
 
-	// Calculate viscous heating / plastic dissipation term
-	qvisc = 3.0*phiVisc*muEff*pow(epsilonDotEq, 2);
+	// Update effective viscosity
+	muEff = thermo.mu();
+
+	// Update heating terms
+	friction.correct();
 
 	// Update mixture specific heat (not used in internal calcs)
 	cpf = thermo.cp();
@@ -34,7 +31,7 @@
 	  - fvm::laplacian(kfh, temp)
 	  //- fvm::Sp(contErr, T) // from compressible interFoam
 	 ==
-	  	qvisc
+		friction.qvisc()
 	  + rad.ST(temp)
 	  + fvOptions(rhoCp, temp)
 	);

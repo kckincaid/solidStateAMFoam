@@ -1,0 +1,8 @@
+stickModels/stickModel/stickModel.C
+stickModels/stickModel/stickModelNew.C
+stickModels/slipStick/slipStick.C
+
+frictionModel/frictionModel.C
+incompressibleFrictionModel/incompressibleFrictionModel.C
+
+LIB = $(FOAM_USER_LIBBIN)/libuserincompressibleFrictionModels

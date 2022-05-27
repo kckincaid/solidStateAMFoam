@@ -238,10 +238,10 @@ Foam::incompressibleTwoPhaseThermalMixture::k1() const
                 << exit(FatalError);
 		}
 	
-		// Create limited temperature field to prevent instabilities and convert to Celcius
+		// Convert temp field if needed and limit to prevent inaccuracy at high/low temps
 		const volScalarField limitedTemp_
 		(
-		    min(max(temp_, Tmin1_), Tmax1_) + celsConv_
+		    min(max(temp_ + celsConv_, Tmin1_), Tmax1_)
 		);
 		
 		// Calculate and return temp-dependent thermal conductivity
@@ -311,7 +311,7 @@ Foam::incompressibleTwoPhaseThermalMixture::k2() const
 		// Create limited temperature field to prevent instabilities and convert to Celsius
 		const volScalarField limitedTemp_
 		(
-		    min(max(temp_, Tmin2_), Tmax2_) + celsConv_
+		    min(max(temp_ + celsConv_, Tmin2_), Tmax2_)
 		);
 		
 		// Calculate and return temp-dependent thermal conductivity
