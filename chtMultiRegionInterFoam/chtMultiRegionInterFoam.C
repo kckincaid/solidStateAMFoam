@@ -50,6 +50,7 @@ Description
 #include "CrankNicolsonDdtScheme.H"		// from interfoam
 #include "subCycle.H"					// from interfoam
 #include "immiscibleIncompressibleTwoPhaseThermalMixture.H" // new class
+#include "incompressibleFrictionModel.H" // friction model class
 #include "regionProperties.H"
 #include "incompressibleCourantNo.H"
 #include "solidRegionDiffNo.H"
