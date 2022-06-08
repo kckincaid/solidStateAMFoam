@@ -87,12 +87,20 @@ Foam::stickModels::slipStick::calcQfric() const
 	// Get updated alpha field (one from constructor doesn't update)
 	const volScalarField& alpha1_ = U_.mesh().lookupObject<volScalarField>(fricPhaseName_);
 
+	// Get yield stress field created by viscoplastic model
+	const volScalarField& sigmay_ = U_.mesh().lookupObject<volScalarField>("sigmay");
+
 	// Return frictional heating
 	return
 	(
-		alpha1_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
+		fricCell_*alpha1_*((scalar(1.0)-delta(rad_))*etaf_*sigmay_/Foam::sqrt(3.0) + delta(rad_)*muf(rad_)*p_)
 	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)+ASMALL))))
 	);
+//	return
+//	(
+//		alpha1_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
+//	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)+ASMALL))))
+//	);
 }
 
 // Calculate distance from center of patch as a vector field
