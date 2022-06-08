@@ -75,6 +75,23 @@ Foam::viscosityModels::SheppardWright::sigmaf() const
     );
 }
 
+// Calculate the yield stress (at a strain rate of 0.1 1/s)
+Foam::tmp<Foam::volScalarField>
+Foam::viscosityModels::SheppardWright::sigmay() const
+{
+	// Import temperature field
+	const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
+
+	// Create dimensioned scalar with value of 0.1 1/s
+	dimensionedScalar e01("e01", dimless/dimTime, 0.1);
+
+	// Return yield stress at given temp and strain rate of 0.1
+    return
+    (
+		sigmaR_*asinh(pow(e01*exp(Q_/(R_*temp_))/A_, 1/n_))
+    );
+}
+
 
 // Calculate effective kinematic viscosity
 Foam::tmp<Foam::volScalarField>
@@ -86,7 +103,7 @@ Foam::viscosityModels::SheppardWright::calcNu() const
 	// Look up limiters or set to default value if not present
 	dimensionedScalar nuMin_("nuMin", dimViscosity, SheppardWrightCoeffs_.lookupOrDefault("nuMin", ROOTVSMALL));
 	dimensionedScalar nuMax_("nuMax", dimViscosity, SheppardWrightCoeffs_.lookupOrDefault("nuMax", ROOTVGREAT));
-	dimensionedScalar strainRateEffMin_("strainRateEffMin", dimless/dimTime, SheppardWrightCoeffs_.lookupOrDefault("strainRateEffMin", ROOTVSMALL));
+	dimensionedScalar eDotMin_("eDotMin", dimless/dimTime, SheppardWrightCoeffs_.lookupOrDefault("eDotMin", ROOTVSMALL));
 
 	// Calculate effective viscosity field
     return max
@@ -95,8 +112,7 @@ Foam::viscosityModels::SheppardWright::calcNu() const
         min
         (
             nuMax_,
-			//sigmaf()/(3.0*rho_*sqrt(2.0/3.0)*max(strainRate(),strainRateEffMin_))
-			sigmaf()/(3.0*rho_*max(epsilonDotEq_,strainRateEffMin_))
+			sigmaf()/(3.0*rho_*max(epsilonDotEq_, eDotMin_))
         )
     );
 }
@@ -132,6 +148,32 @@ Foam::viscosityModels::SheppardWright::SheppardWright
             IOobject::AUTO_WRITE
         ),
         calcNu()
+    ),
+
+    sigmaf_
+    (
+        IOobject
+        (
+            "sigmaf",
+            U_.time().timeName(),
+            U_.db(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    	sigmaf()
+    ),
+
+    sigmay_
+    (
+        IOobject
+        (
+            "sigmay",
+            U_.time().timeName(),
+            U_.db(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    	sigmay()
     )
 {}
 

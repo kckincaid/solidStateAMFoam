@@ -74,6 +74,8 @@ protected:
     // Protected data
 
         volScalarField nu_;
+		volScalarField sigmaf_;	// Flow stress field
+		volScalarField sigmay_; // Yield stress field for qfric calc
 
     // Protected Member Functions
 
@@ -82,6 +84,9 @@ protected:
 
 		//- Calculate and return the flow stress
 		tmp<volScalarField> sigmaf() const;
+
+		//- Calculate and return the yield stress
+		tmp<volScalarField> sigmay() const;
 
         //- Calculate and return the laminar viscosity
         tmp<volScalarField> calcNu() const;
@@ -128,6 +133,8 @@ public:
         virtual void correct()
         {
             nu_ = calcNu();
+			sigmaf_ = sigmaf();
+			sigmay_ = sigmay();
         }
 
         //- Read transportProperties dictionary
