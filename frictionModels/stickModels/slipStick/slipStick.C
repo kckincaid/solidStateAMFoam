@@ -84,10 +84,13 @@ Foam::stickModels::slipStick::calcQfric() const
 
 	dimensionedScalar ASMALL("VVSMALL", dimVelocity*dimLength, SMALL);
 
+	// Get updated alpha field (one from constructor doesn't update)
+	const volScalarField& alpha1_ = U_.mesh().lookupObject<volScalarField>(fricPhaseName_);
+
 	// Return frictional heating
 	return
 	(
-		fricCell_*alpha_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
+		alpha1_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
 	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)+ASMALL))))
 	);
 }
@@ -163,8 +166,8 @@ Foam::stickModels::slipStick::tau() const
 
 	return
 	(
-		TC0_*TLim_/TLim_ + TC1_*TLim_ + TC2_*pow(TLim_, 2) 
-	  + TC3_*pow(TLim_, 3) + TC4_*pow(TLim_, 4)
+		(TC0_*TLim_/TLim_ + TC1_*TLim_ + TC2_*pow(TLim_, 2) 
+	  + TC3_*pow(TLim_, 3) + TC4_*pow(TLim_, 4))*1.0E+6
 	);	
 }
 
@@ -184,6 +187,8 @@ Foam::stickModels::slipStick::slipStick
     slipStickCoeffs_(stickProperties.optionalSubDict(typeName + "Coeffs")),
 
 	phiVisc_("phiVisc", dimless, slipStickCoeffs_),
+
+	fricPhaseName_(stickProperties.lookup("fricPhaseName")),
 
 	patch_(stickProperties.lookup("fricPatch")),
     mu0_("mu0", dimless, slipStickCoeffs_),
@@ -227,6 +232,58 @@ Foam::stickModels::slipStick::slipStick
             IOobject::AUTO_WRITE
         ),
     U_.mesh()
+    ),
+
+    r_
+    (
+        IOobject
+        (
+            "r",
+            U_.time().timeName(),
+            U_.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    r()
+    ),
+
+    delta_
+    (
+        IOobject
+        (
+            "delta",
+            U_.time().timeName(),
+            U_.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    delta(r_)
+    ),
+
+    muf_
+    (
+        IOobject
+        (
+            "muf",
+            U_.time().timeName(),
+            U_.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    muf(r_)
+    ),
+
+    tau_
+    (
+        IOobject
+        (
+            "tau",
+            U_.time().timeName(),
+            U_.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    tau()
     )
 {}
 
@@ -244,6 +301,7 @@ bool Foam::stickModels::slipStick::read
 
 	slipStickCoeffs_.lookup("phiVisc") >> phiVisc_;
 
+	slipStickCoeffs_.lookup("fricPhaseName") >> fricPhaseName_;
 	slipStickCoeffs_.lookup("fricPatch") >> patch_;
     slipStickCoeffs_.lookup("mu0") >> mu0_;
     slipStickCoeffs_.lookup("lambda") >> lambda_;
