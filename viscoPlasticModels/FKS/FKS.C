@@ -70,7 +70,7 @@ Foam::viscosityModels::FKS::H() const
 	(
 		// Return a scalar field equivalent to the strain hardening contribution at full
 		// saturation. Note that atan(x) --> pi/2 when x >> 1
-		(a1_ + a2_*1.571)*temp_/temp_
+		(a1_ + (a2_*1.571))*temp_/temp_
 	);
 }
 
@@ -130,18 +130,43 @@ Foam::viscosityModels::FKS::sigmaf() const
     );
 }
 
+// Calculate the yield stress at 0 plastic strain and strain rate = 0.1 1/s
+Foam::tmp<Foam::volScalarField>
+Foam::viscosityModels::FKS::sigmay() const
+{
+	// Import temperature field
+	const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
+
+	// Convert to homologous temperature
+	volScalarField Th_ = Tstar(temp_);
+
+	// Create dimensionedScalar for strain rate of 0.1 1/s
+	dimensionedScalar e01_("e01", dimless/dimTime, 0.1);
+
+	// Create smol temp value
+	dimensionedScalar Ts_("Ts", dimless, SMALL);
+
+	// Return yield stress
+    return
+    (
+		a1_*Theta(Th_)*(1.0 + (b1_*pow((Th_ + Ts_), b2_))*(b3_*Foam::log(e01_/e0_ + VSMALL)))
+    );
+}
+
 
 // Calculate effective kinematic viscosity
 Foam::tmp<Foam::volScalarField>
 Foam::viscosityModels::FKS::calcNu() const
 {
 	// Import effective strain rate field
-	const volScalarField& edot_ = U_.mesh().lookupObject<volScalarField>("epsilonDotEq");
+	const volScalarField& eDot_ = U_.mesh().lookupObject<volScalarField>("epsilonDotEq");
 
 	// Look up limiters or set to default value if not present
 	dimensionedScalar nuMin_("nuMin", dimViscosity, FKSCoeffs_.lookupOrDefault("nuMin", ROOTVSMALL));
 	dimensionedScalar nuMax_("nuMax", dimViscosity, FKSCoeffs_.lookupOrDefault("nuMax", ROOTVGREAT));
-	dimensionedScalar strainRateEffMin_("strainRateEffMin", dimless/dimTime, FKSCoeffs_.lookupOrDefault("strainRateEffMin", ROOTVSMALL));
+	dimensionedScalar eDotMin_("eDotMin", dimless/dimTime, FKSCoeffs_.lookupOrDefault("eDotMin", ROOTVSMALL));
+
+	//volScalarField nuUnLim_ = sigmaf()/(3.0*rho_*(eDot_ + eDotMin_));
 
 	// Calculate effective viscosity field
     return max
@@ -150,9 +175,11 @@ Foam::viscosityModels::FKS::calcNu() const
         min
         (
             nuMax_,
-			sigmaf()/(3.0*rho_*max(edot_,strainRateEffMin_))
+			sigmaf()/(3.0*rho_*max(eDot_, eDotMin_))
+			//sigmaf()/(3.0*rho_*(edot_ + eDotMin_))
         )
     );
+	//return(max(min(nuUnLim_, nuMax_), nuMin_));
 }
 
 
@@ -196,6 +223,32 @@ Foam::viscosityModels::FKS::FKS
             IOobject::AUTO_WRITE
         ),
         calcNu()
+    ),
+
+    sigmaf_
+    (
+        IOobject
+        (
+            "sigmaf",
+            U_.time().timeName(),
+            U_.db(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    	sigmaf()
+    ),
+
+    sigmay_
+    (
+        IOobject
+        (
+            "sigmay",
+            U_.time().timeName(),
+            U_.db(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    	sigmay()
     )
 {}
 

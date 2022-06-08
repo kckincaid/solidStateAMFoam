@@ -87,6 +87,8 @@ protected:
     // Protected data
 
         volScalarField nu_;
+		volScalarField sigmaf_;
+		volScalarField sigmay_;
 
     // Protected Member Functions
 
@@ -103,8 +105,11 @@ protected:
 		//- Calculate and return the homologous temperature
 		tmp<volScalarField> Tstar(const volScalarField T_) const;
 
-		// Calculate and return the flow stress
+		//- Calculate and return the flow stress
 		tmp<volScalarField> sigmaf() const;
+
+		//- Calculate and return the yield stress (at 0 plastic strain, 0.1 strain rate)
+		tmp<volScalarField> sigmay() const;
 
         //- Calculate and return the laminar viscosity
         tmp<volScalarField> calcNu() const;
@@ -150,7 +155,9 @@ public:
         //- Correct the laminar viscosity
         virtual void correct()
         {
-            nu_ = calcNu();
+			sigmaf_ = sigmaf();
+			sigmay_ = sigmay();         
+			nu_ = calcNu();
         }
 
         //- Read transportProperties dictionary
