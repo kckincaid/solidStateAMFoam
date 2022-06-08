@@ -232,59 +232,8 @@ Foam::stickModels::slipStick::slipStick
             IOobject::AUTO_WRITE
         ),
     U_.mesh()
-    ),
-
-    r_
-    (
-        IOobject
-        (
-            "r",
-            U_.time().timeName(),
-            U_.mesh(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-    r()
-    ),
-
-    delta_
-    (
-        IOobject
-        (
-            "delta",
-            U_.time().timeName(),
-            U_.mesh(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-    delta(r_)
-    ),
-
-    muf_
-    (
-        IOobject
-        (
-            "muf",
-            U_.time().timeName(),
-            U_.mesh(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-    muf(r_)
-    ),
-
-    tau_
-    (
-        IOobject
-        (
-            "tau",
-            U_.time().timeName(),
-            U_.mesh(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-    tau()
     )
+
 {}
 
 

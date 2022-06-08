@@ -95,10 +95,6 @@ protected:
 
         volScalarField qvisc_;
 		volScalarField qfric_;
-		volVectorField r_;
-		volScalarField delta_;
-		volScalarField muf_;
-		volScalarField tau_;
 
 
     // Protected Member Functions
@@ -159,12 +155,6 @@ public:
             qvisc_ = calcQvisc();
 			qfric_ = calcQfric();
 			qfric_.correctBoundaryConditions();
-
-			// Sanity check outputs
-			r_ = r();
-			delta_ = delta(r_);
-			muf_ = muf(r_);
-			tau_ = tau();
         }
 
         //- Read frictionProperties dictionary
