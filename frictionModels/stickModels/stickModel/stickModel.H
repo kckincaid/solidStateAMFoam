@@ -75,9 +75,6 @@ protected:
 
         const volVectorField& U_;
 		const volVectorField& Ut_;
-        const volScalarField& alpha_;
-		const volScalarField& p_;
-
 
     // Private Member Functions
 
@@ -105,11 +102,9 @@ public:
                 const word& name,
                 const dictionary& stickProperties,
                 const volVectorField& U,
-				const volVectorField& Ut,
-                const volScalarField& alpha,
-				const volScalarField& p
+				const volVectorField& Ut
             ),
-            (name, stickProperties, U, Ut, alpha, p)
+            (name, stickProperties, U, Ut)
         );
 
 
@@ -121,9 +116,7 @@ public:
             const word& name,
             const dictionary& stickProperties,
             const volVectorField& U,
-			const volVectorField& Ut,
-            const volScalarField& alpha,
-			const volScalarField& p
+			const volVectorField& Ut
         );
 
 
@@ -135,9 +128,7 @@ public:
             const word& name,
             const dictionary& stickProperties,
             const volVectorField& U,
-			const volVectorField& Ut,
-            const volScalarField& alpha,
-			const volScalarField& p
+			const volVectorField& Ut
         );
 
 

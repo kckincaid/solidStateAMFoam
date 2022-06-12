@@ -81,9 +81,7 @@ public:
         incompressibleFrictionModel
         (
             const volVectorField& U,
-			const volVectorField& Ut,
-            const volScalarField& alpha,
-			const volScalarField& p
+			const volVectorField& Ut
         );
 
 

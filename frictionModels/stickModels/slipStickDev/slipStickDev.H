@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::stickModels::slipStick
+    Foam::stickModels::slipStickDev
 
 Description
     A basic slip-stick model which works with an arbitary slip boundary condition
@@ -30,12 +30,12 @@ Description
 	coefficient.
 
 SourceFiles
-    slipStick.C
+    slipStickDev.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slipStick_H
-#define slipStick_H
+#ifndef slipStickDev_H
+#define slipStickDev_H
 
 #include "stickModel.H"
 #include "dimensionedScalar.H"
@@ -52,23 +52,22 @@ namespace stickModels
 
 
 /*---------------------------------------------------------------------------*\
-                           Class slipStick Declaration
+                           Class slipStickDev Declaration
 \*---------------------------------------------------------------------------*/
 
-class slipStick
+class slipStickDev
 :
     public stickModel
 {
     // Private data
 
-        dictionary slipStickCoeffs_;
+        dictionary slipStickDevCoeffs_;
 
 		// Viscous heating premultiplier
 		dimensionedScalar phiVisc_;
 
 		// Friction quantities
 		word fricPhaseName_;
-		word pName_;
 		word patch_;
         dimensionedScalar mu0_;
         dimensionedScalar lambda_;
@@ -96,6 +95,10 @@ protected:
 
         volScalarField qvisc_;
 		volScalarField qfric_;
+		volVectorField r_;
+		volScalarField delta_;
+		volScalarField muf_;
+		volScalarField tau_;
 
 
     // Protected Member Functions
@@ -114,23 +117,25 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("slipStick");
+    TypeName("slipStickDev");
 
 
     // Constructors
 
         //- Construct from components
-        slipStick
+        slipStickDev
         (
             const word& name,
             const dictionary& stickProperties,
             const volVectorField& U,
-			const volVectorField& Ut
+			const volVectorField& Ut,
+            const volScalarField& alpha,
+			const volScalarField& p
         );
 
 
     //- Destructor
-    virtual ~slipStick()
+    virtual ~slipStickDev()
     {}
 
 
@@ -154,6 +159,12 @@ public:
             qvisc_ = calcQvisc();
 			qfric_ = calcQfric();
 			qfric_.correctBoundaryConditions();
+
+			// Sanity check outputs
+			r_ = r();
+			delta_ = delta(r_);
+			muf_ = muf(r_);
+			tau_ = tau();
         }
 
         //- Read frictionProperties dictionary

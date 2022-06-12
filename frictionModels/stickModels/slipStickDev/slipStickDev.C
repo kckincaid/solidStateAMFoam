@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "slipStick.H"
+#include "slipStickDev.H"
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 
@@ -33,11 +33,11 @@ namespace Foam
 {
 namespace stickModels
 {
-    defineTypeNameAndDebug(slipStick, 0);
+    defineTypeNameAndDebug(slipStickDev, 0);
     addToRunTimeSelectionTable
     (
         stickModel,
-        slipStick,
+        slipStickDev,
         dictionary
     );
 }
@@ -48,7 +48,7 @@ namespace stickModels
 
 // Calculate viscous heating at cell centers
 Foam::tmp<Foam::volScalarField>
-Foam::stickModels::slipStick::calcQvisc() const
+Foam::stickModels::slipStickDev::calcQvisc() const
 {
 	// Create pointers to viscosity and effective strain rate fields
 	const volScalarField& muEff_ = U_.mesh().lookupObject<volScalarField>("muEff");
@@ -60,19 +60,10 @@ Foam::stickModels::slipStick::calcQvisc() const
 
 // Calculate frictional heating on patch
 Foam::tmp<Foam::volScalarField>
-Foam::stickModels::slipStick::calcQfric() const
+Foam::stickModels::slipStickDev::calcQfric() const
 {
 	// Create vector field of distance from patch center
 	volVectorField rad_ = r();
-
-	// Get updated alpha field (one from constructor doesn't update)
-	const volScalarField& alpha_ = U_.mesh().lookupObject<volScalarField>(fricPhaseName_);
-
-	// Get yield stress field created by viscoplastic model
-	const volScalarField& sigmay_ = U_.mesh().lookupObject<volScalarField>("sigmay");
-
-	// Get updated pressure field
-	const volScalarField& p_ = U_.mesh().lookupObject<volScalarField>(pName_);
 
 	// Create a volScalarField with a value of 1 for cells adjacent to friction
 	// patch and a value of 0 for all other cells
@@ -91,25 +82,29 @@ Foam::stickModels::slipStick::calcQfric() const
 		fricCell_[faceCelli_] = 1.0;
 	}
 
-	// Create a small field to prevent FPE issues in qfric calc
+	Info << "test" << endl;
+
 	dimensionedScalar ASMALL("VVSMALL", dimVelocity*dimLength, SMALL);
 
-	// Return frictional heating
+	const volScalarField& alpha1_ = U_.mesh().lookupObject<volScalarField>(fricPhaseName_);
+
 	return
 	(
-		fricCell_*alpha_*((scalar(1.0)-delta(rad_))*etaf_*sigmay_/Foam::sqrt(3.0) + delta(rad_)*muf(rad_)*pos(p_)*p_)
-	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)+ASMALL))))
+		alpha1_*((scalar(1.0)-delta(rad_))*etaf_*tau())
+	  * (mag(omega_)*mag(rad_))
 	);
+
+	// Return frictional heating
 //	return
 //	(
-//		alpha1_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
+//		alpha_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
 //	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)+ASMALL))))
 //	);
 }
 
 // Calculate distance from center of patch as a vector field
 Foam::tmp<Foam::volVectorField>
-Foam::stickModels::slipStick::r() const
+Foam::stickModels::slipStickDev::r() const
 {
 	// Get info for patch
 	scalar patchNum_ = U_.mesh().boundaryMesh().findPatchID(patch_);
@@ -148,7 +143,7 @@ Foam::stickModels::slipStick::r() const
 
 // Calculate slip fraction as a volScalarField
 Foam::tmp<Foam::volScalarField>
-Foam::stickModels::slipStick::delta(const volVectorField r_) const
+Foam::stickModels::slipStickDev::delta(const volVectorField r_) const
 {
 	//return(mag(U_)/mag(r_^omega_));
 	return
@@ -159,14 +154,14 @@ Foam::stickModels::slipStick::delta(const volVectorField r_) const
 
 // Calculate friction coefficient as a volScalarField
 Foam::tmp<Foam::volScalarField>
-Foam::stickModels::slipStick::muf(const volVectorField r_) const
+Foam::stickModels::slipStickDev::muf(const volVectorField r_) const
 {
 	return(mu0_*exp(-lambda_*delta(r_)*mag(omega_)*mag(r_)));	
 }
 
 // Calculate maximum shear stress as a volScalarField
 Foam::tmp<Foam::volScalarField>
-Foam::stickModels::slipStick::tau() const
+Foam::stickModels::slipStickDev::tau() const
 {
 	// Create pointer to temp field and create limited temp
 	const volScalarField& temp_ = U_.mesh().lookupObject<volScalarField>("temp");
@@ -185,39 +180,40 @@ Foam::stickModels::slipStick::tau() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::stickModels::slipStick::slipStick
+Foam::stickModels::slipStickDev::slipStickDev
 (
     const word& name,
     const dictionary& stickProperties,
     const volVectorField& U,
-    const volVectorField& Ut
+    const volVectorField& Ut,
+	const volScalarField& alpha,
+	const volScalarField& p
 )
 :
-    stickModel(name, stickProperties, U, Ut),
-    slipStickCoeffs_(stickProperties.optionalSubDict(typeName + "Coeffs")),
+    stickModel(name, stickProperties, U, Ut, alpha, p),
+    slipStickDevCoeffs_(stickProperties.optionalSubDict(typeName + "Coeffs")),
 
-	phiVisc_("phiVisc", dimless, slipStickCoeffs_),
+	phiVisc_("phiVisc", dimless, slipStickDevCoeffs_),
 
 	fricPhaseName_(stickProperties.lookup("fricPhaseName")),
-	pName_(stickProperties.lookup("pName")),
 
 	patch_(stickProperties.lookup("fricPatch")),
-    mu0_("mu0", dimless, slipStickCoeffs_),
-    lambda_("lambda", dimTime/dimLength, slipStickCoeffs_),
-    omega_("omega", dimless/dimTime, slipStickCoeffs_),
-    etaf_("etaf", dimless, slipStickCoeffs_),
+    mu0_("mu0", dimless, slipStickDevCoeffs_),
+    lambda_("lambda", dimTime/dimLength, slipStickDevCoeffs_),
+    omega_("omega", dimless/dimTime, slipStickDevCoeffs_),
+    etaf_("etaf", dimless, slipStickDevCoeffs_),
 
-	delta0_("delta0", dimless, slipStickCoeffs_),
-	omega0_("omega0", dimless/dimTime, slipStickCoeffs_),
-	Rs_("Rs", dimLength, slipStickCoeffs_),
+	delta0_("delta0", dimless, slipStickDevCoeffs_),
+	omega0_("omega0", dimless/dimTime, slipStickDevCoeffs_),
+	Rs_("Rs", dimLength, slipStickDevCoeffs_),
 
-    TC0_("TC0", dimPressure, slipStickCoeffs_),
-    TC1_("TC1", dimPressure/dimTemperature, slipStickCoeffs_),
-    TC2_("TC2", dimPressure/pow(dimTemperature,2), slipStickCoeffs_),
-    TC3_("TC3", dimPressure/pow(dimTemperature,3), slipStickCoeffs_),
-    TC4_("TC4", dimPressure/pow(dimTemperature,4), slipStickCoeffs_),
-	Tmax_("Tmax", dimTemperature, slipStickCoeffs_),
-	Tmin_("Tmin", dimTemperature, slipStickCoeffs_),
+    TC0_("TC0", dimPressure, slipStickDevCoeffs_),
+    TC1_("TC1", dimPressure/dimTemperature, slipStickDevCoeffs_),
+    TC2_("TC2", dimPressure/pow(dimTemperature,2), slipStickDevCoeffs_),
+    TC3_("TC3", dimPressure/pow(dimTemperature,3), slipStickDevCoeffs_),
+    TC4_("TC4", dimPressure/pow(dimTemperature,4), slipStickDevCoeffs_),
+	Tmax_("Tmax", dimTemperature, slipStickDevCoeffs_),
+	Tmin_("Tmin", dimTemperature, slipStickDevCoeffs_),
 
     qvisc_
     (
@@ -243,43 +239,93 @@ Foam::stickModels::slipStick::slipStick
             IOobject::AUTO_WRITE
         ),
     U_.mesh()
-    )
+    ),
 
+    r_
+    (
+        IOobject
+        (
+            "r",
+            U_.time().timeName(),
+            U_.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    r()
+    ),
+
+    delta_
+    (
+        IOobject
+        (
+            "delta",
+            U_.time().timeName(),
+            U_.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    delta(r_)
+    ),
+
+    muf_
+    (
+        IOobject
+        (
+            "muf",
+            U_.time().timeName(),
+            U_.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    muf(r_)
+    ),
+
+    tau_
+    (
+        IOobject
+        (
+            "tau",
+            U_.time().timeName(),
+            U_.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+    tau()
+    )
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::stickModels::slipStick::read
+bool Foam::stickModels::slipStickDev::read
 (
     const dictionary& stickProperties
 )
 {
     stickModel::read(stickProperties);
 
-    slipStickCoeffs_ = stickProperties.optionalSubDict(typeName + "Coeffs");
+    slipStickDevCoeffs_ = stickProperties.optionalSubDict(typeName + "Coeffs");
 
-	slipStickCoeffs_.lookup("phiVisc") >> phiVisc_;
+	slipStickDevCoeffs_.lookup("phiVisc") >> phiVisc_;
 
-	slipStickCoeffs_.lookup("fricPhaseName") >> fricPhaseName_;
-	slipStickCoeffs_.lookup("pName") >> pName_;
-	slipStickCoeffs_.lookup("fricPatch") >> patch_;
-    slipStickCoeffs_.lookup("mu0") >> mu0_;
-    slipStickCoeffs_.lookup("lambda") >> lambda_;
-    slipStickCoeffs_.lookup("omega") >> omega_;
-    slipStickCoeffs_.lookup("etaf") >> etaf_;
+	slipStickDevCoeffs_.lookup("fricPhaseName") >> fricPhaseName_;
+	slipStickDevCoeffs_.lookup("fricPatch") >> patch_;
+    slipStickDevCoeffs_.lookup("mu0") >> mu0_;
+    slipStickDevCoeffs_.lookup("lambda") >> lambda_;
+    slipStickDevCoeffs_.lookup("omega") >> omega_;
+    slipStickDevCoeffs_.lookup("etaf") >> etaf_;
 
-	slipStickCoeffs_.lookup("delta0") >> delta0_;
-	slipStickCoeffs_.lookup("omega0") >> omega0_;
-	slipStickCoeffs_.lookup("Rs") >> Rs_;
+	slipStickDevCoeffs_.lookup("delta0") >> delta0_;
+	slipStickDevCoeffs_.lookup("omega0") >> omega0_;
+	slipStickDevCoeffs_.lookup("Rs") >> Rs_;
 
-	slipStickCoeffs_.lookup("TC0") >> TC0_;
-	slipStickCoeffs_.lookup("TC1") >> TC1_;
-	slipStickCoeffs_.lookup("TC2") >> TC2_;
-	slipStickCoeffs_.lookup("TC3") >> TC3_;
-	slipStickCoeffs_.lookup("TC4") >> TC4_;
-	slipStickCoeffs_.lookup("Tmax") >> Tmax_;
-	slipStickCoeffs_.lookup("Tmin") >> Tmin_;
+	slipStickDevCoeffs_.lookup("TC0") >> TC0_;
+	slipStickDevCoeffs_.lookup("TC1") >> TC1_;
+	slipStickDevCoeffs_.lookup("TC2") >> TC2_;
+	slipStickDevCoeffs_.lookup("TC3") >> TC3_;
+	slipStickDevCoeffs_.lookup("TC4") >> TC4_;
+	slipStickDevCoeffs_.lookup("Tmax") >> Tmax_;
+	slipStickDevCoeffs_.lookup("Tmin") >> Tmin_;
 
     return true;
 }

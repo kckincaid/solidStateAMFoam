@@ -43,17 +43,13 @@ Foam::stickModel::stickModel
     const word& name,
     const dictionary& stickProperties,
     const volVectorField& U,
-	const volVectorField& Ut,
-    const volScalarField& alpha,
-	const volScalarField& p
+	const volVectorField& Ut
 )
 :
     name_(name),
     stickProperties_(stickProperties),
     U_(U),
-	Ut_(Ut),
-    alpha_(alpha),
-	p_(p)
+	Ut_(Ut)
 {}
 
 
