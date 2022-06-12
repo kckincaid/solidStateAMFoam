@@ -17,7 +17,6 @@ PtrList<volScalarField> ghFluid(fluidRegions.size());
 PtrList<surfaceScalarField> ghfFluid(fluidRegions.size());
 
 // Weld velocity field for modified reference frame
-PtrList<dimensionedVector> VtFluid(fluidRegions.size());
 PtrList<volVectorField> UtFluid(fluidRegions.size());
 
 // Viscosity model variables
@@ -494,7 +493,7 @@ forAll(fluidRegions, i)
 				IOobject::NO_WRITE
 			),
 			fluidRegions[i],
-			Vt //VtFluid[i]
+			Vt
 		)
 	);
 
@@ -503,7 +502,7 @@ forAll(fluidRegions, i)
 	frictionModelFluid.set
 	(
 		i,
-		new incompressibleFrictionModel(UFluid[i], UtFluid[i], alpha1l[i], p_rghFluid[i])
+		new incompressibleFrictionModel(UFluid[i], UtFluid[i])
 	);
 
 	// Create stress and strain variables if desired
