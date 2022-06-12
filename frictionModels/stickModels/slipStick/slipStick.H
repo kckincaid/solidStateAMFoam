@@ -67,7 +67,7 @@ class slipStick
 		dimensionedScalar phiVisc_;
 
 		// Friction quantities
-		word fricPhaseName_;
+		word alphaName_;
 		word pName_;
 		word patch_;
         dimensionedScalar mu0_;

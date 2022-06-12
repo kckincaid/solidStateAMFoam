@@ -66,7 +66,7 @@ Foam::stickModels::slipStick::calcQfric() const
 	volVectorField rad_ = r();
 
 	// Get updated alpha field (one from constructor doesn't update)
-	const volScalarField& alpha_ = U_.mesh().lookupObject<volScalarField>(fricPhaseName_);
+	const volScalarField& alpha_ = U_.mesh().lookupObject<volScalarField>(alphaName_);
 
 	// Get yield stress field created by viscoplastic model
 	const volScalarField& sigmay_ = U_.mesh().lookupObject<volScalarField>("sigmay");
@@ -198,7 +198,7 @@ Foam::stickModels::slipStick::slipStick
 
 	phiVisc_("phiVisc", dimless, slipStickCoeffs_),
 
-	fricPhaseName_(stickProperties.lookup("fricPhaseName")),
+	alphaName_(stickProperties.lookup("alphaName")),
 	pName_(stickProperties.lookup("pName")),
 
 	patch_(stickProperties.lookup("fricPatch")),
@@ -261,7 +261,7 @@ bool Foam::stickModels::slipStick::read
 
 	slipStickCoeffs_.lookup("phiVisc") >> phiVisc_;
 
-	slipStickCoeffs_.lookup("fricPhaseName") >> fricPhaseName_;
+	slipStickCoeffs_.lookup("alphaName") >> alphaName_;
 	slipStickCoeffs_.lookup("pName") >> pName_;
 	slipStickCoeffs_.lookup("fricPatch") >> patch_;
     slipStickCoeffs_.lookup("mu0") >> mu0_;
