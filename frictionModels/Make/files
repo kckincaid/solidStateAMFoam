@@ -1,6 +1,7 @@
 stickModels/stickModel/stickModel.C
 stickModels/stickModel/stickModelNew.C
-stickModels/slipStick/slipStick.C
+stickModels/constantSlipStick/constantSlipStick.C
+stickModels/exponentialSlipStick/exponentialSlipStick.C
 
 frictionModel/frictionModel.C
 incompressibleFrictionModel/incompressibleFrictionModel.C
