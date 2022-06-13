@@ -14,21 +14,12 @@
 	// Update mixture conductivity (at cell centers)
 	kf = thermo.k();
 
-	// Initialize face conductivity with arithmetic interpolation
-	surfaceScalarField kfh("kf", fvc::interpolate(kf));
-
-	// Recalculate using harmonic interpolation if specified in case properties
-	if (interpolationType == "harmonic")
-	{
-		kfh = 1.0/fvc::interpolate(1/kf);
-	}
-
 	// Construct and solve temperature equation
 	tmp<fvScalarMatrix> tTEqn
 	(
 		fvm::ddt(rhoCp, temp)
 	  + fvm::div(rhoPhiCp, temp)
-	  - fvm::laplacian(kfh, temp)
+	  - fvm::laplacian(kf, temp)
 	  //- fvm::Sp(contErr, T) // from compressible interFoam
 	 ==
 		friction.qvisc()
