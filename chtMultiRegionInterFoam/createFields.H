@@ -14,8 +14,5 @@ IOdictionary caseProperties
 // Read in moving reference frame velocity vector from caseProperties
 dimensionedVector Vt("Vt", dimVelocity, caseProperties.lookup("Vt"));
 
-// Read in interpolation method for calculating
-const word interpolationType = caseProperties.lookupOrDefault<word>("interpolationType", "arithmetic");
-
 #include "createFluidFields.H"
 #include "createSolidFields.H"
