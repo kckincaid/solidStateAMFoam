@@ -3,7 +3,7 @@ fvMesh& mesh = solidRegions[i];
 
 // Set basic solid field values
 volScalarField& temp = TSolid[i];
-volScalarField& k = kSolid[i];
+volScalarField& ks = kSolid[i];
 dimensionedScalar& rho = rhoSolid[i];
 dimensionedScalar& cp = cpSolid[i];
 
