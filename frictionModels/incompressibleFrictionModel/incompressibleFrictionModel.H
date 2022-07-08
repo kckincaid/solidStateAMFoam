@@ -47,7 +47,7 @@ namespace Foam
 class stickModel;
 
 /*---------------------------------------------------------------------------*\
-                Class singlePhaseTransportModel Declaration
+                Class incompressibleFrictionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class incompressibleFrictionModel
