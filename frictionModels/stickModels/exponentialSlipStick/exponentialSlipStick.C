@@ -91,22 +91,18 @@ Foam::stickModels::exponentialSlipStick::calcQfric() const
 		fricCell_[faceCelli_] = 1.0;
 	}
 
-	// Create a small field to prevent FPE issues in qfric calc
+	// Create a small field to prevent FPE issues with traverse velocity correction
 	//dimensionedScalar ASMALL("VVSMALL", dimVelocity*dimLength, SMALL);
 
-	// Return frictional heating
+	// Return frictional heating WITHOUT traverse velocity correction
 	return
 	(
 		fricCell_*alpha_*((scalar(1.0)-delta(rad_))*betaTQ_*sigmay_/Foam::sqrt(3.0) + delta(rad_)*muf(rad_)*p_)*(mag(omega_)*mag(rad_))
 	);
+	// Return frictional heating WITH traverse velocity correction
 //	return
 //	(
 //		fricCell_*alpha_*((scalar(1.0)-delta(rad_))*etaf_*sigmay_/Foam::sqrt(3.0) + delta(rad_)*muf(rad_)*pos(p_)*p_)
-//	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)+ASMALL))))
-//	);
-//	return
-//	(
-//		alpha1_*((scalar(1.0)-delta(rad_))*etaf_*tau() + delta(rad_)*muf(rad_)*p_)
 //	  * (mag(omega_)*mag(rad_) - mag(Ut_)*Foam::sqrt(1.0 - sqr((rad_ & Ut_)/(mag(rad_)*mag(Ut_)+ASMALL))))
 //	);
 }

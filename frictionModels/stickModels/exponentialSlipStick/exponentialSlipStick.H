@@ -25,9 +25,10 @@ Class
     Foam::stickModels::exponentialSlipStick
 
 Description
-    A basic slip-stick model which works with an arbitary slip boundary condition
-	(e.g. constant, exponential, etc.) and a constant or exponential friction
-	coefficient.
+    A slip-stick model in which the slip fraction and friction coefficient
+	vary as a function of radius, or distance from the tool center. Requires
+	a number of user-defined inputs which control the degree of slip and 
+	magnitude of friction coefficient.
 
 SourceFiles
     exponentialSlipStick.C
