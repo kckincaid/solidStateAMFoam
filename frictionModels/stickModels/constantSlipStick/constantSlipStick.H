@@ -25,9 +25,8 @@ Class
     Foam::stickModels::constantSlipStick
 
 Description
-    A basic slip-stick model which works with an arbitary slip boundary condition
-	(e.g. constant, exponential, etc.) and a constant or exponential friction
-	coefficient.
+    A basic slip-stick model in which the slip fraction and friction
+	coefficient are taken to be constant values.
 
 SourceFiles
     constantSlipStick.C
